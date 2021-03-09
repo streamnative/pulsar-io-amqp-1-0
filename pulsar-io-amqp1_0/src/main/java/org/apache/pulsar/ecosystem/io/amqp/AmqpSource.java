@@ -18,37 +18,41 @@
  */
 package org.apache.pulsar.ecosystem.io.amqp;
 
+import io.netty.buffer.ByteBuf;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import javax.jms.Destination;
 import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
-import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pulsar.functions.api.Record;
 import org.apache.pulsar.io.core.PushSource;
 import org.apache.pulsar.io.core.SourceContext;
 import org.apache.qpid.jms.JmsConnectionFactory;
+import org.apache.qpid.jms.message.JmsMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
+import org.apache.qpid.jms.provider.amqp.message.AmqpCodec;
+import org.apache.qpid.jms.provider.amqp.message.AmqpJmsMessageFacade;
 
 
 /**
  * QpidJms source connector.
  */
 @Slf4j
-public class QpidJmsSource extends PushSource<byte[]> {
+public class AmqpSource extends PushSource<byte[]> {
 
+    private AmqpSourceConfig config;
     private JMSContext jmsContext;
     private JMSConsumer jmsConsumer;
 
     @Override
     public void open(Map map, SourceContext sourceContext) throws Exception {
-        QpidJmsSourceConfig config = QpidJmsSourceConfig.load(map);
+        config = AmqpSourceConfig.load(map);
         config.validate();
 
         JmsConnectionFactory factory;
@@ -66,39 +70,33 @@ public class QpidJmsSource extends PushSource<byte[]> {
         }
 
         jmsConsumer = jmsContext.createConsumer(destination);
-        jmsConsumer.setMessageListener(new MessageListenerImpl(this));
+        jmsConsumer.setMessageListener(new MessageListenerImpl(this, config));
     }
 
     /**
      * MessageListener implement.
      */
-    @Data
+    @AllArgsConstructor
     private static class MessageListenerImpl implements MessageListener {
 
         private final PushSource<byte[]> pushSource;
+        private final AmqpSourceConfig config;
 
         @Override
         public void onMessage(Message message) {
             try {
                 QpidJmsRecord record;
-                if (message instanceof JmsTextMessage) {
+                if (config.isOnlyTextMessage()) {
                     record = new QpidJmsRecord(
                             Optional.empty(), ((JmsTextMessage) message).getText().getBytes(StandardCharsets.UTF_8));
                 } else {
-                    record = new QpidJmsRecord(Optional.empty(), new byte[0]);
+                    ByteBuf byteBuf = AmqpCodec.encodeMessage(
+                            (AmqpJmsMessageFacade) ((JmsMessage) message).getFacade());
+                    byte[] bytes = new byte[byteBuf.readableBytes()];
+                    byteBuf.readBytes(bytes);
+                    record = new QpidJmsRecord(Optional.empty(), bytes);
                 }
                 pushSource.consume(record);
-                record.completableFuture.whenComplete((ignored, throwable) -> {
-                    if (throwable != null) {
-                        log.error("Failed to consume record.", throwable);
-                        return;
-                    }
-                    try {
-                        message.acknowledge();
-                    } catch (JMSException e) {
-                        log.error("Failed to ack qpid jms message.", e);
-                    }
-                });
             } catch (Exception e) {
                 log.error("Failed to consume qpid jms message.", e);
             }
@@ -110,15 +108,8 @@ public class QpidJmsSource extends PushSource<byte[]> {
      */
     @Data
     private static class QpidJmsRecord implements Record<byte[]> {
-
         private final Optional<String> key;
         private final byte[] value;
-        CompletableFuture<Void> completableFuture = new CompletableFuture<>();
-
-        @Override
-        public void ack() {
-            completableFuture.complete(null);
-        }
     }
 
     @Override

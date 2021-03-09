@@ -19,5 +19,5 @@
 
 name: qpidjms
 description: QpidJms source and sink connector
-sourceClass: org.apache.pulsar.ecosystem.io.amqp.QpidJmsSource
-sinkClass: org.apache.pulsar.ecosystem.io.amqp.QpidJmsSink
+sourceClass: org.apache.pulsar.ecosystem.io.amqp.AmqpSource
+sinkClass: org.apache.pulsar.ecosystem.io.amqp.AmqpSink

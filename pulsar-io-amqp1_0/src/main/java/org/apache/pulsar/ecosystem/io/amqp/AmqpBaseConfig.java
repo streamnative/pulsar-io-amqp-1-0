@@ -22,9 +22,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
-import javax.jms.Destination;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.apache.qpid.jms.JmsDestination;
 import org.apache.qpid.jms.JmsQueue;
 import org.apache.qpid.jms.JmsTopic;
 
@@ -34,7 +34,7 @@ import org.apache.qpid.jms.JmsTopic;
  */
 @Data
 @Accessors(chain = true)
-public class QpidJmsBaseConfig {
+public class AmqpBaseConfig {
 
     private String username;
     private String password;
@@ -44,10 +44,11 @@ public class QpidJmsBaseConfig {
 
     private String queue;
     private String topic;
+    private boolean onlyTextMessage = false;
 
-    public static QpidJmsBaseConfig load(Map<String, Object> config) throws IOException {
+    public static AmqpBaseConfig load(Map<String, Object> config) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.readValue(objectMapper.writeValueAsBytes(config), QpidJmsBaseConfig.class);
+        return objectMapper.readValue(objectMapper.writeValueAsBytes(config), AmqpBaseConfig.class);
     }
 
     public void validate() throws ConfigurationInvalidException {
@@ -71,8 +72,8 @@ public class QpidJmsBaseConfig {
         return this.protocol + "://" + host + ":" + port;
     }
 
-    public Destination getDestination() {
-        Destination destination = null;
+    public JmsDestination getDestination() {
+        JmsDestination destination = null;
         if (queue != null && !queue.isEmpty()) {
             destination = new JmsQueue(queue);
         } else if (topic != null && !topic.isEmpty()) {

@@ -18,9 +18,9 @@
  */
 package org.apache.pulsar.ecosystem.io.amqp;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import javax.jms.Destination;
 import javax.jms.JMSContext;
 import javax.jms.JMSProducer;
 import javax.jms.TextMessage;
@@ -29,23 +29,31 @@ import org.apache.pulsar.functions.api.Record;
 import org.apache.pulsar.io.core.Sink;
 import org.apache.pulsar.io.core.SinkContext;
 import org.apache.qpid.jms.JmsConnectionFactory;
+import org.apache.qpid.jms.JmsDestination;
+import org.apache.qpid.jms.JmsSession;
 import org.apache.qpid.jms.message.JmsMessage;
+import org.apache.qpid.jms.provider.amqp.AmqpConsumer;
+import org.apache.qpid.jms.provider.amqp.message.AmqpCodec;
+import org.apache.qpid.jms.provider.amqp.message.AmqpJmsMessageFacade;
+import org.apache.qpid.jms.provider.amqp.message.AmqpUtils;
+import org.apache.qpid.proton.codec.ReadableBuffer;
 
 
 /**
  * QpidJms sink connector.
  */
 @Slf4j
-public class QpidJmsSink implements Sink<byte[]> {
+public class AmqpSink implements Sink<byte[]> {
 
-    private QpidJmsSinkConfig config;
+    private AmqpSinkConfig config;
     private JMSContext jmsContext;
     private JMSProducer jmsProducer;
-    private Destination destination;
+    private JmsDestination destination;
+    private AmqpConsumer amqpConsumer;
 
     @Override
     public void open(Map map, SinkContext sinkContext) throws Exception {
-        config = QpidJmsSinkConfig.load(map);
+        config = AmqpSinkConfig.load(map);
         config.validate();
 
         JmsConnectionFactory factory;
@@ -62,14 +70,30 @@ public class QpidJmsSink implements Sink<byte[]> {
             throw new ConfigurationInvalidException("The destination is null.");
         }
 
+        JmsSession jmsSession = (JmsSession) factory.createConnection().createSession();
         jmsProducer = jmsContext.createProducer();
+        amqpConsumer = AmqpUtils.generateAmqpConsumer(
+                ((AmqpJmsMessageFacade) ((JmsMessage) jmsSession.createMessage()).getFacade()), destination);
     }
 
     @Override
     public void write(Record<byte[]> record) throws Exception {
-        TextMessage textMessage = jmsContext.createTextMessage(new String(record.getValue(), StandardCharsets.UTF_8));
-        JmsMessage jmsMessage;
-        jmsProducer.send(destination, textMessage);
+        try {
+            if (config.isOnlyTextMessage()) {
+                TextMessage textMessage = jmsContext.createTextMessage(
+                        new String(record.getValue(), StandardCharsets.UTF_8));
+                jmsProducer.send(destination, textMessage);
+            } else {
+                AmqpJmsMessageFacade facade = AmqpCodec.decodeMessage(
+                        amqpConsumer, new ReadableBuffer.ByteBufferReader(ByteBuffer.wrap(record.getValue())));
+                jmsProducer.send(destination, facade.asJmsMessage());
+            }
+            record.ack();
+        } catch (Exception e) {
+            log.error("Failed to send message.", e);
+            record.fail();
+        }
+
 //        jmsProducer.send(destination, textMessage).setAsync(new CompletionListener() {
 //            @Override
 //            public void onCompletion(Message message) {

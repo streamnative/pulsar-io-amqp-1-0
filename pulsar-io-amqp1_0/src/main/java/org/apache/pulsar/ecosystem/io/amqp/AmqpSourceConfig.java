@@ -32,11 +32,11 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-public class QpidJmsSourceConfig extends QpidJmsBaseConfig {
+public class AmqpSourceConfig extends AmqpBaseConfig {
 
-    public static QpidJmsSourceConfig load(Map<String, Object> config) throws IOException {
+    public static AmqpSourceConfig load(Map<String, Object> config) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.readValue(objectMapper.writeValueAsBytes(config), QpidJmsSourceConfig.class);
+        return objectMapper.readValue(objectMapper.writeValueAsBytes(config), AmqpSourceConfig.class);
     }
 
 }

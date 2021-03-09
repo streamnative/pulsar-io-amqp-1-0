@@ -18,6 +18,7 @@
  */
 package org.apache.pulsar.ecosystem.io.amqp.tests;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -28,11 +29,15 @@ import javax.jms.Destination;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
+import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+import lombok.AllArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.jms.JmsConnectionFactory;
 import org.apache.qpid.jms.JmsQueue;
+import org.apache.qpid.jms.message.JmsObjectMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.junit.Assert;
 import org.junit.Test;
@@ -67,7 +72,7 @@ public class IntegrationTest {
                 "amqp1_0-sink-config.yaml", "/pulsar/amqp1_0-sink-config.yaml", BindMode.READ_ONLY);
 
         standaloneContainer.start();
-        System.out.println("standalone container start.");
+        log.info("standalone container start.");
 
         SolaceContainer solaceContainer = new SolaceContainer(SolaceContainer.IMAGE);
         solaceContainer.setNetwork(network);
@@ -79,33 +84,33 @@ public class IntegrationTest {
         solaceContainer.withEnv("username_admin_password", "admin");
         solaceContainer.setShmSize(1024L * 1024 * 1024 * 2);
         solaceContainer.start();
-        System.out.println("solace container start.");
+        log.info("solace container start.");
 
         Container.ExecResult execResult = standaloneContainer.execInContainer(
                 "/pulsar/bin/pulsar-admin",
                 "sources", "create", "--source-config-file", "/pulsar/amqp1_0-source-config.yaml");
         Assert.assertEquals(execResult.getStdout().trim(), "\"Created successfully\"");
         waitForConnectorRunning(standaloneContainer, true, "amqp1_0-source");
-        System.out.println("amqp1_0 source is running");
+        log.info("amqp1_0 source is running");
 
         execResult = standaloneContainer.execInContainer(
                 "/pulsar/bin/pulsar-admin",
                 "sinks", "create", "--sink-config-file", "/pulsar/amqp1_0-sink-config.yaml");
         Assert.assertEquals(execResult.getStdout().trim(), "\"Created successfully\"");
         waitForConnectorRunning(standaloneContainer, false, "amqp1_0-sink");
-        System.out.println("amqp1_0 sink is running");
+        log.info("amqp1_0 sink is running");
 
         String solaceRemoteUri = "amqp://" + solaceContainer.getHost() + ":" + solaceContainer.getMappedPort(5672);
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        System.out.println("start verify data");
+        log.info("start verify data");
         verifyData(100, solaceRemoteUri, countDownLatch);
 
-        System.out.println("start generate data");
+        log.info("start generate data");
         generateData(100, solaceRemoteUri);
 
         countDownLatch.await();
-        System.out.println("Finish the integration test.");
+        log.info("Finish the integration test.");
     }
 
     private void generateData(int count, String remoteUri) {
@@ -121,20 +126,28 @@ public class IntegrationTest {
 
             long start = System.currentTimeMillis();
             for (int i = 1; i <= count; i++) {
-                TextMessage message = session.createTextMessage("Text - " + i);
-                messageProducer.send(
-                        message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
-                System.out.println("Sent message " + i);
+                if (i % 2 == 0) {
+                    TextMessage message = session.createTextMessage("Text - " + i);
+                    messageProducer.send(message,
+                            DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+                    log.info("send text message {}", i);
+                } else {
+                    ObjectMessage message = session.createObjectMessage();
+                    message.setObject(new User("jack - " + i, i + 10));
+                    messageProducer.send(message,
+                            DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+                    log.info("Sent object message {}", i);
+                }
             }
 
             long finish = System.currentTimeMillis();
             long taken = finish - start;
-            System.out.println("Sent " + count + " messages in " + taken + "ms");
+            log.info("Sent {} messages in {} ms.", count, taken);
 
             connection.close();
         } catch (Exception exp) {
-            System.out.println("Caught exception, exiting. error message " + exp.getMessage());
-            exp.printStackTrace(System.out);
+//            System.out.println("Caught exception, exiting. error message " + exp.getMessage());
+            log.error("Caught exception when producing messages, exiting.", exp);
             System.exit(1);
         }
     }
@@ -154,15 +167,24 @@ public class IntegrationTest {
                 long start = System.currentTimeMillis();
                 for (int i = 1; i <= count; i++) {
                     Message message = messageConsumer.receive();
-                    System.out.println("receive message " + ((JmsTextMessage) message).getText());
-                    log.info("Got message {} content {}", i, ((JmsTextMessage) message).getText());
+                    if (message instanceof JmsTextMessage) {
+                        Assert.assertEquals(((JmsTextMessage) message).getText(), "Text - " + i);
+                        log.info("receive text message {} content {}", i, ((JmsTextMessage) message).getText());
+                    } else if (message instanceof JmsObjectMessage) {
+                        Assert.assertTrue(((JmsObjectMessage) message).getObject() instanceof User);
+                        User user = (User) ((JmsObjectMessage) message).getObject();
+                        Assert.assertEquals(user.name, "jack - " + i);
+                        Assert.assertEquals(user.age, i + 10);
+                        log.info("receive object message {} content {}",
+                                i, ((JmsObjectMessage) message).getObject().toString());
+                    }
                 }
                 log.info("Received {} messages in token {} ms.", count, System.currentTimeMillis() - start);
                 connection.close();
                 countDownLatch.countDown();
             } catch (Exception exp) {
-                System.out.println("Caught exception, exiting. error message " + exp.getMessage());
-                log.error("Caught exception, exiting.", exp);
+//                System.out.println("Caught exception, exiting. error message " + exp.getMessage());
+                log.error("Caught exception when receiving messages, exiting.", exp);
                 Assert.fail("Failed to receive messages, error message: " + exp.getMessage());
             }
         }).start();
@@ -178,6 +200,13 @@ public class IntegrationTest {
             );
             Thread.sleep(1000);
         } while (!execResult.getStdout().contains("\"running\" : true"));
+    }
+
+    @ToString
+    @AllArgsConstructor
+    private static class User implements Serializable {
+        String name;
+        int age;
     }
 
 }

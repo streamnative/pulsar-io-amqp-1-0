@@ -16,27 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.pulsar.ecosystem.io.amqp;
+package org.apache.qpid.jms.provider.amqp.message;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.util.Map;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.experimental.Accessors;
-
+import org.apache.qpid.jms.JmsDestination;
+import org.apache.qpid.jms.meta.JmsConsumerId;
+import org.apache.qpid.jms.meta.JmsConsumerInfo;
+import org.apache.qpid.jms.provider.amqp.AmqpConsumer;
 
 /**
- * QpidJms sink config.
+ * Amqp utils.
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-@Accessors(chain = true)
-public class QpidJmsSinkConfig extends QpidJmsBaseConfig {
+public class AmqpUtils {
 
-    public static QpidJmsSinkConfig load(Map<String, Object> config) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.readValue(objectMapper.writeValueAsBytes(config), QpidJmsSinkConfig.class);
+    public static AmqpConsumer generateAmqpConsumer(AmqpJmsMessageFacade facade, JmsDestination destination) {
+        JmsConsumerInfo jmsConsumerInfo = new JmsConsumerInfo(new JmsConsumerId("connectionId", 0, 0), null);
+        jmsConsumerInfo.setDestination(destination);
+        return new AmqpConsumer(facade.getConnection().getConnectionSession(), jmsConsumerInfo, null);
     }
 
 }
