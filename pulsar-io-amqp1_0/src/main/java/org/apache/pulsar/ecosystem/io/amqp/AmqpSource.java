@@ -19,6 +19,7 @@
 package org.apache.pulsar.ecosystem.io.amqp;
 
 import io.netty.buffer.ByteBuf;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
@@ -30,6 +31,7 @@ import javax.jms.MessageListener;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.pulsar.client.api.Schema;
 import org.apache.pulsar.functions.api.Record;
 import org.apache.pulsar.io.core.PushSource;
 import org.apache.pulsar.io.core.SourceContext;
@@ -44,7 +46,7 @@ import org.apache.qpid.jms.provider.amqp.message.AmqpJmsMessageFacade;
  * QpidJms source connector.
  */
 @Slf4j
-public class AmqpSource extends PushSource<byte[]> {
+public class AmqpSource extends PushSource<ByteBuffer> {
 
     private AmqpSourceConfig config;
     private JMSContext jmsContext;
@@ -79,7 +81,7 @@ public class AmqpSource extends PushSource<byte[]> {
     @AllArgsConstructor
     private static class MessageListenerImpl implements MessageListener {
 
-        private final PushSource<byte[]> pushSource;
+        private final PushSource<ByteBuffer> pushSource;
         private final AmqpSourceConfig config;
 
         @Override
@@ -88,13 +90,12 @@ public class AmqpSource extends PushSource<byte[]> {
                 QpidJmsRecord record;
                 if (config.isOnlyTextMessage()) {
                     record = new QpidJmsRecord(
-                            Optional.empty(), ((JmsTextMessage) message).getText().getBytes(StandardCharsets.UTF_8));
+                            Optional.empty(),
+                            ByteBuffer.wrap(((JmsTextMessage) message).getText().getBytes(StandardCharsets.UTF_8)));
                 } else {
                     ByteBuf byteBuf = AmqpCodec.encodeMessage(
                             (AmqpJmsMessageFacade) ((JmsMessage) message).getFacade());
-                    byte[] bytes = new byte[byteBuf.readableBytes()];
-                    byteBuf.readBytes(bytes);
-                    record = new QpidJmsRecord(Optional.empty(), bytes);
+                    record = new QpidJmsRecord(Optional.empty(), byteBuf.nioBuffer());
                 }
                 pushSource.consume(record);
             } catch (Exception e) {
@@ -107,9 +108,14 @@ public class AmqpSource extends PushSource<byte[]> {
      * QpidJms record.
      */
     @Data
-    private static class QpidJmsRecord implements Record<byte[]> {
+    private static class QpidJmsRecord implements Record<ByteBuffer> {
         private final Optional<String> key;
-        private final byte[] value;
+        private final ByteBuffer value;
+
+        @Override
+        public Schema<ByteBuffer> getSchema() {
+            return Schema.BYTEBUFFER;
+        }
     }
 
     @Override

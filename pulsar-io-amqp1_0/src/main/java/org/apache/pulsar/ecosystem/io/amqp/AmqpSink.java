@@ -43,12 +43,13 @@ import org.apache.qpid.proton.codec.ReadableBuffer;
  * QpidJms sink connector.
  */
 @Slf4j
-public class AmqpSink implements Sink<byte[]> {
+public class AmqpSink implements Sink<ByteBuffer> {
 
     private AmqpSinkConfig config;
     private JMSContext jmsContext;
     private JMSProducer jmsProducer;
     private JmsDestination destination;
+    // This is used for decodeMessage.
     private AmqpConsumer amqpConsumer;
 
     @Override
@@ -77,35 +78,23 @@ public class AmqpSink implements Sink<byte[]> {
     }
 
     @Override
-    public void write(Record<byte[]> record) throws Exception {
+    public void write(Record<ByteBuffer> record) throws Exception {
         try {
             if (config.isOnlyTextMessage()) {
                 TextMessage textMessage = jmsContext.createTextMessage(
-                        new String(record.getValue(), StandardCharsets.UTF_8));
+                        StandardCharsets.UTF_8.newDecoder().decode(record.getValue()).toString());
                 jmsProducer.send(destination, textMessage);
             } else {
                 AmqpJmsMessageFacade facade = AmqpCodec.decodeMessage(
-                        amqpConsumer, new ReadableBuffer.ByteBufferReader(ByteBuffer.wrap(record.getValue())));
+                        amqpConsumer, new ReadableBuffer.ByteBufferReader(record.getValue()));
                 jmsProducer.send(destination, facade.asJmsMessage());
             }
             record.ack();
         } catch (Exception e) {
             log.error("Failed to send message.", e);
             record.fail();
+            throw e;
         }
-
-//        jmsProducer.send(destination, textMessage).setAsync(new CompletionListener() {
-//            @Override
-//            public void onCompletion(Message message) {
-//                record.ack();
-//            }
-//
-//            @Override
-//            public void onException(Message message, Exception exception) {
-//                log.error("Failed send message to qpid jms broker.", exception);
-//                record.fail();
-//            }
-//        });
     }
 
     @Override
