@@ -31,11 +31,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.apache.pulsar.ecosystem</groupId>
-  <artifactId>pulsar-io-template</artifactId>
+  <artifactId>pulsar-io-amqp1_0-parent</artifactId>
   <packaging>pom</packaging>
   <version>2.7.0</version>
-  <name>Pulsar Ecosystem :: IO Connector :: Template Project</name>
-  <description>It is a project template for developing an Apache Pulsar connector</description>
+  <name>Pulsar Ecosystem :: IO Connector :: AMQP1_0</name>
+  <description>This is an Apache Pulsar AMQP1_0 connector</description>
 
   <properties>
     <java.version>1.8</java.version>
