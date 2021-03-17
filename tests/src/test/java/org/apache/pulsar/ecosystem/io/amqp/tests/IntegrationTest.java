@@ -44,6 +44,8 @@ import org.junit.Test;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.Network;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.node.ObjectNode;
 
 
 /**
@@ -93,11 +95,15 @@ public class IntegrationTest {
         waitForConnectorRunning(standaloneContainer, true, "amqp1_0-source");
         log.info("amqp1_0 source is running");
 
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("user-op-queue-topic", "org.apache.pulsar.client.impl.schema.ByteBufferSchema");
+
         execResult = standaloneContainer.execInContainer(
                 "/pulsar/bin/pulsar-admin",
                 "sinks", "create",
                 "--custom-schema-inputs",
-                "'{\"user-op-queue-topic\": \"org.apache.pulsar.client.impl.schema.ByteBufferSchema\"}'",
+                objectNode.toString(),
                 "--sink-config-file",
                 "/pulsar/amqp1_0-sink-config.yaml"
                 );
@@ -152,7 +158,6 @@ public class IntegrationTest {
 
             connection.close();
         } catch (Exception exp) {
-//            System.out.println("Caught exception, exiting. error message " + exp.getMessage());
             log.error("Caught exception when producing messages, exiting.", exp);
             System.exit(1);
         }
@@ -189,7 +194,6 @@ public class IntegrationTest {
                 connection.close();
                 countDownLatch.countDown();
             } catch (Exception exp) {
-//                System.out.println("Caught exception, exiting. error message " + exp.getMessage());
                 log.error("Caught exception when receiving messages, exiting.", exp);
                 Assert.fail("Failed to receive messages, error message: " + exp.getMessage());
             }
