@@ -17,7 +17,7 @@
 # under the License.
 #
 
-name: qpidjms
-description: QpidJms source and sink connector
+name: amqp1_0
+description: AMQP1_0 source and AMQP1_0 connector
 sourceClass: org.apache.pulsar.ecosystem.io.amqp.AmqpSource
 sinkClass: org.apache.pulsar.ecosystem.io.amqp.AmqpSink

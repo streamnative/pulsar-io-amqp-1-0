@@ -95,7 +95,9 @@ public class IntegrationTest {
 
         execResult = standaloneContainer.execInContainer(
                 "/pulsar/bin/pulsar-admin",
-                "sinks", "create", "--sink-config-file", "/pulsar/amqp1_0-sink-config.yaml");
+                "sinks", "create", "--sink-config-file", "/pulsar/amqp1_0-sink-config.yaml",
+                "--custom-schema-inputs",
+                "'{\"user-op-queue-topic\": \"org.apache.pulsar.client.impl.schema.ByteBufferSchema\"}'");
         Assert.assertEquals(execResult.getStdout().trim(), "\"Created successfully\"");
         waitForConnectorRunning(standaloneContainer, false, "amqp1_0-sink");
         log.info("amqp1_0 sink is running");
