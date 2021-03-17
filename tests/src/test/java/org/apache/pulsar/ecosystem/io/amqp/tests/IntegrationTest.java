@@ -93,11 +93,16 @@ public class IntegrationTest {
         waitForConnectorRunning(standaloneContainer, true, "amqp1_0-source");
         log.info("amqp1_0 source is running");
 
+        String schemaInputs = "";
+
         execResult = standaloneContainer.execInContainer(
                 "/pulsar/bin/pulsar-admin",
-                "sinks", "create", "--sink-config-file", "/pulsar/amqp1_0-sink-config.yaml",
+                "sinks", "create",
                 "--custom-schema-inputs",
-                "'{\"user-op-queue-topic\": \"org.apache.pulsar.client.impl.schema.ByteBufferSchema\"}'");
+                "'{\"user-op-queue-topic\": \"org.apache.pulsar.client.impl.schema.ByteBufferSchema\"}'",
+                "--sink-config-file",
+                "/pulsar/amqp1_0-sink-config.yaml"
+                );
         Assert.assertEquals(execResult.getStdout().trim(), "\"Created successfully\"");
         waitForConnectorRunning(standaloneContainer, false, "amqp1_0-sink");
         log.info("amqp1_0 sink is running");
@@ -200,6 +205,7 @@ public class IntegrationTest {
                     "/pulsar/bin/pulsar-admin",
                     isSource ? "sources" : "sinks", "status", "--name", name
             );
+            log.info("execResult: {}", execResult.toString());
             Thread.sleep(1000);
         } while (!execResult.getStdout().contains("\"running\" : true"));
     }
