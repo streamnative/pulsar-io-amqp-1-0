@@ -59,13 +59,18 @@ public class AmqpBaseConfig {
             throw new ConfigurationInvalidException("The configuration port is invalid.");
         }
 
+        if (StringUtils.isNotEmpty(queue) && StringUtils.isNotEmpty(topic)) {
+            throw new ConfigurationInvalidException("The queue and topic couldn't be set at the same time.");
+        }
         String destinationName = null;
-        if (queue != null &&  !queue.isEmpty()) {
+        if (StringUtils.isNotEmpty(queue)) {
             destinationName = queue;
-        } else if (topic != null && !topic.isEmpty()) {
+        } else if (StringUtils.isNotEmpty(topic)) {
             destinationName = topic;
         }
-        Objects.requireNonNull(destinationName, "The queueName and topicName all not set.");
+        if (StringUtils.isEmpty(destinationName)) {
+            throw new ConfigurationInvalidException("The queue and topic all not set.");
+        }
     }
 
     public String getUri() {
@@ -74,9 +79,9 @@ public class AmqpBaseConfig {
 
     public JmsDestination getDestination() {
         JmsDestination destination = null;
-        if (queue != null && !queue.isEmpty()) {
+        if (StringUtils.isNotEmpty(queue)) {
             destination = new JmsQueue(queue);
-        } else if (topic != null && !topic.isEmpty()) {
+        } else if (StringUtils.isNotEmpty(topic)) {
             destination = new JmsTopic(topic);
         }
         return destination;

@@ -47,6 +47,7 @@ public class AmqpSink implements Sink<ByteBuffer> {
 
     private AmqpSinkConfig config;
     private JMSContext jmsContext;
+    private JmsSession jmsSession;
     private JMSProducer jmsProducer;
     private JmsDestination destination;
     // This is used for decodeMessage.
@@ -71,7 +72,7 @@ public class AmqpSink implements Sink<ByteBuffer> {
             throw new ConfigurationInvalidException("The destination is null.");
         }
 
-        JmsSession jmsSession = (JmsSession) factory.createConnection().createSession();
+        jmsSession = (JmsSession) factory.createConnection().createSession();
         jmsProducer = jmsContext.createProducer();
         amqpConsumer = AmqpUtils.generateAmqpConsumer(
                 ((AmqpJmsMessageFacade) ((JmsMessage) jmsSession.createMessage()).getFacade()), destination);
@@ -100,5 +101,6 @@ public class AmqpSink implements Sink<ByteBuffer> {
     @Override
     public void close() throws Exception {
         this.jmsContext.close();
+        this.jmsSession.close();
     }
 }
