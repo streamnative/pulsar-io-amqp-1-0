@@ -31,10 +31,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.apache.pulsar.ecosystem</groupId>
-  <artifactId>pulsar-io-template</artifactId>
-  <version>0.0.1</version>
-  <name>Pulsar Ecosystem :: IO Connector :: Template Project</name>
-  <description>It is a project template for developing an Apache Pulsar connector</description>
+  <artifactId>pulsar-io-amqp1_0-parent</artifactId>
+  <packaging>pom</packaging>
+  <version>2.7.0</version>
+  <name>Pulsar Ecosystem :: IO Connector :: AMQP1_0</name>
+  <description>This is an Apache Pulsar AMQP1_0 connector</description>
 
   <properties>
     <java.version>1.8</java.version>
@@ -47,13 +48,16 @@
     <!-- connector dependencies -->
     <jackson.version>2.9.7</jackson.version>
     <lombok.version>1.16.22</lombok.version>
-    <pulsar.version>2.2.0</pulsar.version>
+    <pulsar.version>2.7.0</pulsar.version>
+    <qpid.version>0.56.0</qpid.version>
+    <log4j2.version>2.13.3</log4j2.version>
+    <slf4j.version>1.7.25</slf4j.version>
 
     <!-- test dependencies -->
     <junit.version>4.13.1</junit.version>
     <mockito.version>2.22.0</mockito.version>
     <powermock.version>2.0.0-beta.5</powermock.version>
-    <testcontainers.version>1.8.3</testcontainers.version>
+    <testcontainers.version>1.15.2</testcontainers.version>
 
     <!-- build plugin dependencies -->
     <license.plugin.version>3.0</license.plugin.version>
@@ -72,6 +76,11 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+
+  <modules>
+    <module>pulsar-io-amqp1_0</module>
+    <module>tests</module>
+  </modules>
 
   <!-- keep all the dependencies used by all modules here -->
   <dependencyManagement>
@@ -127,6 +136,30 @@
 
   <!-- include the dependencies -->
   <dependencies>
+
+    <!-- connector -->
+    <dependency>
+      <groupId>org.apache.qpid</groupId>
+      <artifactId>qpid-jms-client</artifactId>
+      <version>${qpid.version}</version>
+    </dependency>
+
+    <!-- log -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j2.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+      <version>${log4j2.version}</version>
+    </dependency>
 
     <!-- provided dependencies (available at compilation and test classpaths and *NOT* packaged) -->
     <dependency>
@@ -190,7 +223,7 @@
             <source>${java.version}</source>
             <target>${java.version}</target>
             <compilerArgs>
-              <compilerArg>-Werror</compilerArg>
+<!--              <compilerArg>-Werror</compilerArg>-->
               <compilerArg>-Xlint:deprecation</compilerArg>
               <compilerArg>-Xlint:unchecked</compilerArg>
               <!-- https://issues.apache.org/jira/browse/MCOMPILER-205 -->
@@ -239,15 +272,28 @@
             <excludes>
               <exclude>LICENSE</exclude>
               <exclude>NOTICE</exclude>
+              <exclude>Jenkinsfile</exclude>
+              <exclude>**/build/**</exclude>
+              <exclude>**/ahc.properties</exclude>
+              <exclude>**/.idea/**</exclude>
+              <exclude>**/.github/**</exclude>
             </excludes>
             <mapping>
               <proto>JAVADOC_STYLE</proto>
+              <go>DOUBLESLASH_STYLE</go>
               <conf>SCRIPT_STYLE</conf>
               <ini>SCRIPT_STYLE</ini>
               <yaml>SCRIPT_STYLE</yaml>
+              <tf>SCRIPT_STYLE</tf>
               <cfg>SCRIPT_STYLE</cfg>
+              <Makefile>SCRIPT_STYLE</Makefile>
+              <service>SCRIPT_STYLE</service>
+              <cc>JAVADOC_STYLE</cc>
               <md>XML_STYLE</md>
               <txt>SCRIPT_STYLE</txt>
+              <scss>JAVADOC_STYLE</scss>
+              <Doxyfile>SCRIPT_STYLE</Doxyfile>
+              <tfvars>SCRIPT_STYLE</tfvars>
             </mapping>
           </configuration>
           <executions>
