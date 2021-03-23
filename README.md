@@ -15,6 +15,8 @@ how this template project organize the files for a connector.
 
 ├── conf
 ├── docs
+├── pulsar-io-amqp1_0
+│   ├── src
 ├── src
 │   ├── checkstyle
 │   ├── license
@@ -29,7 +31,10 @@ how this template project organize the files for a connector.
 
 - `conf` directory is used for storing examples of config files of this connector.
 - `docs` directory is used for keeping the documentation of this connector.
-- `src` directory is used for storing the source code of this connector.
+- `pulsar-io-amqp1_0`
+  - `src` directory is used for storing the source code of this connector.
+- `tests` integration test
+- `src`
   - `src/checkstyle`: store the checkstyle configuration files
   - `src/license`: store the license header for this project. `mvn license:format` can
     be used for formatting the project with the stored license header in this directory.
