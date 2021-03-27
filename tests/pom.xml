@@ -50,7 +50,7 @@
             <configuration>
               <tasks>
                 <echo>copy connector</echo>
-                <copy file="${basedir}/../pulsar-io-amqp1_0/target/pulsar-io-amqp1_0-${project.version}.nar"
+                <copy file="${basedir}/../io-amqp1_0-impl/target/pulsar-io-amqp1_0-${project.version}.nar"
                       tofile="${basedir}/src/test/resources/pulsar-io-amqp1_0.nar"/>
               </tasks>
             </configuration>

@@ -28,7 +28,7 @@ Below are the sub folders and files of this project and their corresponding desc
 ├── conf // examples of configuration files of this connector
 ├── docs // user guides of this connector
 ├── script // scripts of this connector
-├── pulsar-io-amqp1_0
+├── io-amqp1_0-impl
 │   ├── src // source code of this connector
 ├── tests // integration test
 ├── src
