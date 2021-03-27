@@ -78,7 +78,7 @@
   </licenses>
 
   <modules>
-    <module>pulsar-io-amqp1_0</module>
+    <module>io-amqp1_0-impl</module>
     <module>tests</module>
   </modules>
 
