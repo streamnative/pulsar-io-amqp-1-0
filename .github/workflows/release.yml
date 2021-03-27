@@ -18,7 +18,7 @@ jobs:
         run: |
           version=`./scripts/dev/get-project-version.py`
           mvn clean install -DskipTests
-          rm -rf pulsar-*
+          rm -rf pulsar-io-*
           cp io-amqp1_0-impl/target/pulsar-io-amqp1_0-${version}.nar ./
           cp README.md ./pulsar-io-amqp1_0-readme.md
           echo "ls pulsar-io-*"
