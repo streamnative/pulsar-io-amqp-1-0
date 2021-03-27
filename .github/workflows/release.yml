@@ -2,7 +2,6 @@ name: Pulsar IO AMQP1_0 Release
 
 on:
   release:
-    types: [created]
 
 jobs:
   upload:
@@ -20,14 +19,14 @@ jobs:
           version=`./scripts/dev/get-project-version.py`
           mvn clean install -DskipTests
           rm -rf pulsar-*
-          cp pulsar-io-amqp1_0/target/pulsar-io-amqp1_0-${version}.nar ./
+          cp io-amqp1_0-impl/target/pulsar-io-amqp1_0-${version}.nar ./
           cp README.md ./pulsar-io-amqp1_0-readme.md
-          echo "ls pulsar-*"
-          ls pulsar-*
+          echo "ls pulsar-io-*"
+          ls pulsar-io-*
 
       - name: publish
         uses: skx/github-action-publish-binaries@release-0.11
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: 'pulsar-*'
+          args: 'pulsar-io-*'
