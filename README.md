@@ -18,7 +18,7 @@ The AMQP1_0 connector is a [Pulsar IO connector](http://pulsar.apache.org/docs/e
 
 | AMQP1_0 connector version |Pulsar version| Doc |
 | :---------- |  :------------- |:------------- |
-2.7.1.1 | 2.7.0 |  - [AMQP1_0 source connector](branch-2.7.1/docs/amqp-1-0-source.md)<br><br>  - [AMQP1_0 sink connector](branch-2.7.1/docs/amqp-1-0-sink.md)
+2.7.1.1 | 2.7.0 |  - [AMQP1_0 source connector](https://github.com/streamnative/pulsar-io-amqp-1-0/blob/branch-2.7.1/docs/amqp-1-0-source.md)<br><br>  - [AMQP1_0 sink connector](https://github.com/streamnative/pulsar-io-amqp-1-0/blob/branch-2.7.1/docs/amqp-1-0-sink.md)
 
 ## Project layout
 
