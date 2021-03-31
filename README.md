@@ -6,19 +6,19 @@ The AMQP1_0 connector is a [Pulsar IO connector](http://pulsar.apache.org/docs/e
   
   This connector feeds data from AMQP and writes data to Pulsar topics. 
 
-  ![](docs/amqp1_0-source.png)
+  ![](docs/amqp-1-0-source.png)
 
 - AMQP1_0 **sink** connector 
   
   This connector pulls data from Pulsar topics and persists data to AMQP.
 
-  ![](docs/amqp1_0-sink.png)
+  ![](docs/amqp-1-0-sink.png)
             
 ## Doc
 
 | AMQP1_0 connector version |Pulsar version| Doc |
 | :---------- |  :------------- |:------------- |
-2.7.0 | 2.7.0 |  - [AMQP1_0 source connector](TBD)<br><br>  - [AMQP1_0 sink connector](TBD)
+2.7.1.1 | 2.7.0 |  - [AMQP1_0 source connector](branch-2.7.1/docs/amqp-1-0-source.md)<br><br>  - [AMQP1_0 sink connector](branch-2.7.1/docs/amqp-1-0-sink.md)
 
 ## Project layout
 
