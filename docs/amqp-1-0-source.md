@@ -3,61 +3,61 @@ description: The AMQP1_0 source connector receives messages from AMQP service an
 author: ["StreamNative"]
 contributors: ["StreamNative"]
 language: Java
-document:
-source: "https://github.com/streamnative/pulsar-io-amqp1-0/tree/v2.7.0/src/main/java/org/apache/pulsar/ecosystem/io/amqp"
+document: 
+source: "https://github.com/streamnative/pulsar-io-amqp-1-0/tree/branch-2.7.1/io-amqp1_0-impl/src/main/java/org/apache/pulsar/ecosystem/io/amqp"
 license: Apache License 2.0
 tags: ["Pulsar IO", "AMQP", "Qpid", "JMS", "Source"]
 alias: AMQP1_0 source
 features: ["Use AMQP1_0 source connector to sync data to Pulsar"]
 license_link: "https://www.apache.org/licenses/LICENSE-2.0"
-icon: "https://www.amqp.org/sites/amqp.org/themes/genesis_amqp/images/amqp-logo.png /images/connectors/amqp1_0.png"
-download: "https://github.com/streamnative/pulsar-io-amqp1-0/releases/download/v2.7.0/pulsar-io-amqp1_0-2.7.0.nar"
+icon: "/images/connectors/amqp-logo.png"
+download: "https://github.com/streamnative/pulsar-io-amqp-1-0/releases/download/v2.7.1.1/pulsar-io-amqp1_0-2.7.1.1.nar"
 support: StreamNative
 support_link: https://streamnative.io
 support_img: "/images/connectors/streamnative.png"
-dockerfile:
-id: "amqp1_0-source"
+dockerfile: 
+id: "amqp-1-0-source"
 ---
-
-# AMQP1_0 source connector
 
 The AMQP1_0 source connector receives messages from [AMQP 1.0](https://www.amqp.org/) and writes messages to Pulsar topics.
 
-## How to get
+![](/docs/amqp-1-0-source.png)
+
+# How to get 
 
 You can get the AMQP1_0 source connector using one of the following methods:
 
-Download the NAR package from [here](https://github.com/streamnative/pulsar-io-amqp1-0/releases/download/v2.7.0/pulsar-io-amqp1_0-2.7.0.nar).
+* Download the NAR package from [here](https://github.com/streamnative/pulsar-io-amqp-1-0/releases/download/v2.7.1.1/pulsar-io-amqp1_0-2.7.1.1.nar).
 
-Build it from the source code.
+* Build it from the source code.
 
-1. Clone the source code to your machine.
+  1. Clone the source code to your machine.
 
 
-```bash
-git clone https://github.com/streamnative/pulsar-io-amqp-1-0
-```
+        ```bash
+        git clone https://github.com/streamnative/pulsar-io-amqp-1-0
+        ```
 
-2. Assume that `PULSAR_IO_AMQP1_0_HOME` is the home directory for the `pulsar-io-amqp1_0` repo. Build the connector in the `${PULSAR_IO_AMQP1_0_HOME}` directory.
+  2. Assume that `PULSAR_IO_AMQP1_0_HOME` is the home directory for the `pulsar-io-amqp1_0` repo. Build the connector in the `${PULSAR_IO_AMQP1_0_HOME}` directory.
 
-```bash
-mvn clean install -DskipTests
-```
+        ```bash
+        mvn clean install -DskipTests
+        ```
 
-After the connector is successfully built, a `NAR` package is generated under the `target` directory.
+        After the connector is successfully built, a `NAR` package is generated under the `target` directory.
 
-```bash
-ls pulsar-io-amqp1_0/target
-pulsar-io-amqp1_0-2.7.0.nar
-```
+        ```bash
+        ls pulsar-io-amqp1_0/target
+        pulsar-io-amqp1_0-{version}.nar
+        ```
 
-## How to configure
+# How to configure 
 
 Before using the AMQP1_0 source connector, you need to configure it.
 
 You can create a configuration file (JSON or YAML) to set the following properties.
 
-| Name | Type|Required | Default | Description
+| Name | Type|Required | Default | Description 
 |------|----------|----------|---------|-------------|
 | `protocol` |String| true | "amqp" | The AMQP protocol. |
 | `host` | String| true | " " (empty string) | The AMQP service host. |
@@ -66,11 +66,11 @@ You can create a configuration file (JSON or YAML) to set the following properti
 | `password` | String|false | " " (empty string) | The password used to authenticate to AMQP1_0. |
 | `queue` | String|false | " " (empty string) | The queue name that messages should be read from or written to. |
 | `topic` | String|false | " " (empty string) | The topic name that messages should be read from or written to. |
-| `onlyTextMessage` | boolean | false | false | If set to `true` requires AMQP message type is TextMessage, Pulsar consumer could consume the messages with schema ByteBuffer. |
+| `onlyTextMessage` | boolean | false | false | If it is set to `true`, the AMQP message type must be set to `TextMessage`. Pulsar consumers can consume the messages with schema ByteBuffer. |
 
 **Example**
 
-* JSON
+* JSON 
 
     ```json
     {
@@ -94,44 +94,46 @@ You can create a configuration file (JSON or YAML) to set the following properti
 * YAML
 
     ```yaml
-    tenant: "public"
-    namespace: "default"
-    name: "amqp1_0-source"
-    topicName: "user-op-queue-topic"
-    archive: "connectors/pulsar-io-amqp1_0-{version}.nar"
-    parallelism: 1
-    
-    configs:
-        protocol: "amqp"
-        host: "localhost"
-        port: "5672"
-        username: "guest"
-        password: "guest"
-        queue: "user-op-queue"
+        tenant: "public"
+        namespace: "default"
+        name: "amqp1_0-source"
+        topicName: "user-op-queue-topic"
+        archive: "connectors/pulsar-io-amqp1_0-{version}.nar"
+        parallelism: 1
+        
+        configs:
+            protocol: "amqp"
+            host: "localhost"
+            port: "5672"
+            username: "guest"
+            password: "guest"
+            queue: "user-op-queue"
     ```
 
-## How to use
+# How to use
 
-### Use as non built-in connector
+You can use the AMQP1_0 source connector as a non built-in connector or a built-in connector as below. 
+
+## Use as non built-in connector 
 
 If you already have a Pulsar cluster, you can use the AMQP1_0 source connector as a non built-in connector directly.
 
 This example shows how to create an AMQP1_0 source connector on a Pulsar cluster using the command [`pulsar-admin sources create`](http://pulsar.apache.org/tools/pulsar-admin/2.8.0-SNAPSHOT/#-em-create-em--14).
 
-
 ```
 PULSAR_HOME/bin/pulsar-admin sources create \
 --name amqp1_0-source \
---archive pulsar-io-amqp1_0-2.7.0.nar \
+--archive pulsar-io-amqp1_0-{version}.nar \
 --classname org.apache.pulsar.ecosystem.io.amqp.AmqpSource \
 --source-config-file amqp-source-config.yaml
 ```
 
-### Use as built-in connector
+## Use as built-in connector
 
 You can make the AMQP1_0 source connector as a built-in connector and use it on standalone cluster, on-premises cluster, or K8S cluster.
 
-#### Standalone cluster
+### Standalone cluster
+
 1. Prepare AMQP service using Solace.
 
     ```
@@ -146,79 +148,96 @@ You can make the AMQP1_0 source connector as a built-in connector and use it on 
 
 3. Start Pulsar in standalone mode.
 
+    **Input**
+
     ```
-    $PULSAR_HOME/bin/pulsar standalone
+    PULSAR_HOME/bin/pulsar standalone
     ```
 
-   You can find the similar logs as below.
+    **Output**
+
+    You can find the similar logs as below.
 
     ```
     Searching for connectors in /Volumes/other/apache-pulsar-2.8.0-SNAPSHOT/./connectors
-Found connector ConnectorDefinition(name=amqp1_0, description=AMQP1_0 source and AMQP1_0 connector, sourceClass=org.apache.pulsar.ecosystem.io.amqp.AmqpSource, sinkClass=org.apache.pulsar.ecosystem.io.amqp.AmqpSink, sourceConfigClass=null, sinkConfigClass=null) from /Volumes/other/apache-pulsar-2.8.0-SNAPSHOT/./connectors/pulsar-io-amqp1_0-2.7.0.nar
-Searching for functions in /Volumes/other/apache-pulsar-2.8.0-SNAPSHOT/./functions
-```
+    Found connector ConnectorDefinition(name=amqp1_0, description=AMQP1_0 source and AMQP1_0 connector, sourceClass=org.apache.pulsar.ecosystem.io.amqp.AmqpSource, sinkClass=org.apache.pulsar.ecosystem.io.amqp.AmqpSink, sourceConfigClass=null, sinkConfigClass=null) from /Volumes/other/apache-pulsar-2.8.0-SNAPSHOT/./connectors/pulsar-io-amqp1_0-2.7.0.nar
+    Searching for functions in /Volumes/other/apache-pulsar-2.8.0-SNAPSHOT/./functions
+    ```
 
 4. Create an AMQP1_0 source.
 
+    **Input**
+
     ```
-    $PULSAR_HOME/bin/pulsar-admin sources create --source-type amqp1_0 --source-config-file amqp-source-config.yaml
+    PULSAR_HOME/bin/pulsar-admin sources create \
+    --source-type amqp1_0 \
+    --source-config-file amqp-source-config.yaml
     ```
 
-   **Output**
+    **Output**
+    
     ```
     "Created successfully"
     ```
 
-   Verify whether the source is created successfully or not.
+    Verify whether the source is created successfully or not.
+
+    **Input**
+
     ```
-    $PULSAR_HOME/bin/pulsar-admin sources list
+    PULSAR_HOME/bin/pulsar-admin sources list
     ```
 
-   **Output**
+    **Output**
+
     ```
     [
     "amqp1_0-source"
     ]
     ```
 
-   Check the source status.
+    Check the source status.
 
-   **Input**
+    **Input**
+
     ```
-    $PULSAR_HOME/bin/pulsar-admin sources status --name amqp1_0-source
+    PULSAR_HOME/bin/pulsar-admin sources status --name amqp1_0-source
     ```
 
-   **Output**
+    **Output**
+
     ```
       {
         "numInstances" : 1,
         "numRunning" : 1,
         "instances" : [ {
-          "instanceId" : 0,
-          "status" : {
-          "running" : true,
-          "error" : "",
-          "numRestarts" : 0,
-          "numReceivedFromSource" : 0,
-          "numSystemExceptions" : 0,
-          "latestSystemExceptions" : [ ],
-          "numSourceExceptions" : 0,
-          "latestSourceExceptions" : [ ],
-          "numWritten" : 0,
-          "lastReceivedTime" : 0,
-          "workerId" : "c-standalone-fw-localhost-8080"
-          }
+        "instanceId" : 0,
+        "status" : {
+        "running" : true,
+        "error" : "",
+        "numRestarts" : 0,
+        "numReceivedFromSource" : 0,
+        "numSystemExceptions" : 0,
+        "latestSystemExceptions" : [ ],
+        "numSourceExceptions" : 0,
+        "latestSourceExceptions" : [ ],
+        "numWritten" : 0,
+        "lastReceivedTime" : 0,
+        "workerId" : "c-standalone-fw-localhost-8080"
+        }
         } ]
-      }
+        }
     ```
 
 5. Consume messages from Pulsar topics.
 
     ```
-    $PULSAR_HOME/bin/pulsar-client consume -s "test" public/default/user-op-queue-topic -n 10
+    PULSAR_HOME/bin/pulsar-client consume -s "test" public/default/user-op-queue-topic -n 10
     ```
 
 6. Send messages to AMQP1_0 service using the method `sendMessage`.
+
+    **Input**
 
     ```
     @Test
@@ -236,15 +255,18 @@ Searching for functions in /Volumes/other/apache-pulsar-2.8.0-SNAPSHOT/./functio
     }
     ```
 
-Check the source status.
+    Check the source status.
+
+    **Input**
 
     ```
-    $PULSAR_HOME/bin/pulsar-admin sources status --name amqp1_0-source
+    PULSAR_HOME/bin/pulsar-admin sources status --name amqp1_0-source
     ```
 
     **Output**
 
     The values of `numWritten` and `lastReceivedTime` are changed.
+
     ```
     {
         "numInstances" : 1,
@@ -268,27 +290,26 @@ Check the source status.
     }
     ```
 
-Now you can see the Pulsar consumer receives the 10 messages. The message contents are not in normal, because the contents contain some extra infomations of the `TextMessage`.
+    Now you can see the Pulsar consumer receives 10 messages. The message contents are not in regular formats since the message contents contain some extra information about `TextMessage`.
 
-**Output**
+    **Output**
 
     ```
     ----- got message -----
     key:[null], properties:[], content:Sp�ASr�)�x-opt-jms-msg-typeQ�x-opt-jms-destQSs�\
     �/ID:67e69637-bd24-4ee1-86b7-be89e5a49b7f:1:1:1-1@�queue://user-op-queue@@@@@@�x?|�)Sw�
-    text str - 0
+                                                                                        text str - 0
     ...
     ```
 
+### On-premise cluster
 
-#### On-premise cluster
-
-This example explains how to create an AMQP1_0 source connector in an on-premises cluster.
+This example explains how to create an AMQP1_0 source connector on an on-premises cluster.
 
 1. Copy the NAR package of the AMQP1_0 connector to the Pulsar connectors directory.
 
     ```
-    cp pulsar-io-amqp1_0-2.7.0.nar $PULSAR_HOME/connectors/pulsar-io-amqp1_0-2.7.0.nar
+    cp pulsar-io-amqp1_0-{version}.nar $PULSAR_HOME/connectors/pulsar-io-amqp1_0-{version}.nar
     ```
 
 2. Reload all [built-in connectors](https://pulsar.apache.org/docs/en/next/io-connectors/).
@@ -306,22 +327,20 @@ This example explains how to create an AMQP1_0 source connector in an on-premise
 4. Create an AMQP1_0 source connector on a Pulsar cluster using the [`pulsar-admin sources create`](http://pulsar.apache.org/tools/pulsar-admin/2.8.0-SNAPSHOT/#-em-create-em--14) command.
 
     ```
-    PULSAR_HOME/bin/pulsar-admin sources create \
-    --source-type amqp1_0 \
-    --source-config-file amqp-source-config.yaml \
-    --name amqp1_0-source
+    cp pulsar-io-amqp1_0-{version}.nar $PULSAR_HOME/connectors/pulsar-io-amqp1_0-{version}.nar
     ```
 
-
-#### On K8S cluster
+### On K8S cluster
 
 This example demonstrates how to create an AMQP1_0 source connector on a K8S cluster.
 
-1. Build a new image based on the Pulsar image with the AMQP1_0 source connector and push the new image to your image registry. This example tags the new image as `streamnative/pulsar-amqp1_0:2.7.0`.
+1. Build a new image based on the Pulsar image with the AMQP1_0 source connector and push the new image to your image registry. 
+   
+   This example tags the new image as `streamnative/pulsar-amqp1_0:2.7.0`.
 
     ```Dockerfile
     FROM apachepulsar/pulsar-all:2.7.0
-    RUN curl https://github.com/streamnative/pulsar-io-amqp1-0/releases/download/v2.7.0/pulsar-io-amqp1_0-2.7.0.nar -o /pulsar/connectors/pulsar-io-amqp1_0-2.7.0.nar
+    RUN curl https://github.com/streamnative/pulsar-io-amqp-1-0/releases/download/v{version}/pulsar-io-amqp1_0-{version}.nar -o /pulsar/connectors/pulsar-io-amqp1_0-{version}.nar
     ```
 
 2. Extract the previous `--set` arguments from K8S to the `pulsar.yaml` file.
@@ -340,9 +359,9 @@ This example demonstrates how to create an AMQP1_0 source connector on a K8S clu
         -f pulsar.yaml
     ```
 
-   > **Tip**
-   >
-   > For more information about how to upgrade a Pulsar cluster with Helm, see [Upgrade Guide](https://docs.streamnative.io/platform/latest/install-and-upgrade/helm/install/upgrade).
+    > **Tip**
+    >
+    > For more information about how to upgrade a Pulsar cluster with Helm, see [Upgrade Guide](https://docs.streamnative.io/platform/latest/install-and-upgrade/helm/install/upgrade).
 
 5. Create an AMQP1_0 source connector on a Pulsar cluster using the [`pulsar-admin sources create`](http://pulsar.apache.org/tools/pulsar-admin/2.8.0-SNAPSHOT/#-em-create-em--14) command.
 
