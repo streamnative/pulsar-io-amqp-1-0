@@ -3,7 +3,7 @@ description: The AMQP1_0 source connector receives messages from AMQP service an
 author: ["StreamNative"]
 contributors: ["StreamNative"]
 language: Java
-document: 
+document: 
 source: "https://github.com/streamnative/pulsar-io-amqp-1-0/tree/branch-2.7.1/io-amqp1_0-impl/src/main/java/org/apache/pulsar/ecosystem/io/amqp"
 license: Apache License 2.0
 tags: ["Pulsar IO", "AMQP", "Qpid", "JMS", "Source"]
@@ -15,9 +15,12 @@ download: "https://github.com/streamnative/pulsar-io-amqp-1-0/releases/download/
 support: StreamNative
 support_link: https://streamnative.io
 support_img: "/images/connectors/streamnative.png"
-dockerfile: 
+dockerfile: 
+owner_name: "StreamNative"
+owner_img: "/images/streamnative.png" 
 id: "amqp-1-0-source"
 ---
+
 
 The AMQP1_0 source connector receives messages from [AMQP 1.0](https://www.amqp.org/) and writes messages to Pulsar topics.
 
