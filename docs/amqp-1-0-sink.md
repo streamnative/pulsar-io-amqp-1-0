@@ -3,7 +3,7 @@ description: The AMQP1_0 sink connector pulls messages from Pulsar topics and pe
 author: ["StreamNative"]
 contributors: ["StreamNative"]
 language: Java
-document: 
+document: 
 source: "https://github.com/streamnative/pulsar-io-amqp-1-0/tree/branch-2.7.1/io-amqp1_0-impl/src/main/java/org/apache/pulsar/ecosystem/io/amqp"
 license: Apache License 2.0
 tags: ["Pulsar IO", "AMQP", "Qpid", "JMS", "Sink"]
@@ -11,13 +11,16 @@ alias: AMQP1_0 sink
 features: ["Use AMQP1_0 sink connector to sync data from Pulsar"]
 license_link: "https://www.apache.org/licenses/LICENSE-2.0"
 icon: "/images/connectors/amqp-logo.png"
-download: "https://github.com/streamnative/pulsar-io-amqp-1-0/releases/download/v2.7.1.1/pulsar-io-amqp1_0-2.7.1.1.nar"
+download: "https://github.com/streamnative/pulsar-io-sqs/releases/download/v2.7.0/pulsar-io-sqs-2.7.0.nar"
 support: StreamNative
 support_link: https://streamnative.io
 support_img: "/images/connectors/streamnative.png"
-dockerfile: 
+dockerfile: 
+owner_name: "StreamNative"
+owner_img: "/images/streamnative.png" 
 id: "amqp-1-0-sink"
 ---
+
 
 The AMQP1_0 sink connector pulls messages from Pulsar topics and persists messages to [AMQP 1.0](https://www.amqp.org/).
 
