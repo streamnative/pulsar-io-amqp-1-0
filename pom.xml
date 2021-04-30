@@ -86,7 +86,7 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.apache.pulsar</groupId>
+        <groupId>io.streamnative</groupId>
         <artifactId>pulsar-io-core</artifactId>
         <version>${pulsar.version}</version>
       </dependency>
@@ -175,7 +175,7 @@
 
     <!-- runtime dependencies -->
     <dependency>
-      <groupId>org.apache.pulsar</groupId>
+      <groupId>io.streamnative</groupId>
       <artifactId>pulsar-io-core</artifactId>
     </dependency>
 
