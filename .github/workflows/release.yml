@@ -2,7 +2,7 @@ name: Pulsar IO AMQP1_0 Release
 
 on:
   release:
-
+    types: [published]
 jobs:
   upload:
     name: Upload Release files
