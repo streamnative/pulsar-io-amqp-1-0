@@ -1,3 +1,8 @@
+---
+dockerfile: "https://hub.docker.com/r/streamnative/pulsar-io-amqp-1-0"
+alias: AMQP1_0 Sink Connector
+---
+
 # AMQP1_0 sink connector
 
 The AMQP1_0 sink connector pulls messages from Pulsar topics and persists messages to [AMQP 1.0](https://www.amqp.org/).
@@ -6,11 +11,13 @@ The AMQP1_0 sink connector pulls messages from Pulsar topics and persists messag
 
 # How to get 
 
-You can get the AMQP1_0 sink connector using one of the following methods:
+You can get the AMQP1_0 sink connector using one of the following methods.
 
-* Download the NAR package from [here](https://github.com/streamnative/pulsar-io-amqp-1-0/releases/download/v2.7.1.1/pulsar-io-amqp1_0-2.7.1.1.nar).
+## Use it with Function Worker
 
-* Build it from source code.
+- Download the NAR package from [here](https://github.com/streamnative/pulsar-io-amqp-1-0/releases/download/v{{connector:version}}/pulsar-io-amqp1_0-{{connector:version}}.nar).
+
+- Build it from the source code.
 
   1. Clone the source code to your machine.
 
@@ -28,8 +35,13 @@ You can get the AMQP1_0 sink connector using one of the following methods:
 
         ```bash
         ls pulsar-io-amqp1_0/target
-        pulsar-io-amqp1_0-{version}.nar
+        pulsar-io-amqp1_0-{{connector:version}}.nar
         ```
+
+## Use it with Function Mesh
+
+Pull the AMQP1_0 connector Docker image from [here](https://hub.docker.com/r/streamnative/pulsar-io-amqp-1-0).
+
 
 # How to configure 
 
@@ -49,6 +61,10 @@ You can create a configuration file (JSON or YAML) to set the following properti
 | `activeMessageType` | String|false |0 | The ActiveMQ message simple class name. |
 | `onlyTextMessage` | boolean | false | false | If it is set to `true`, the AMQP message type must be set to `TextMessage`. Pulsar consumers can consume the messages with schema ByteBuffer. |
 
+## Configure it with Function Worker
+
+You can create a configuration file (JSON or YAML) to set the properties as below.
+
 **Example**
 
 * JSON 
@@ -59,7 +75,7 @@ You can create a configuration file (JSON or YAML) to set the following properti
         "namespace": "default",
         "name": "amqp1_0-sink",
         "inputs": ["user-op-queue-topic"],
-        "archive": "connectors/pulsar-io-amqp1_0-{version}.nar",
+        "archive": "connectors/pulsar-io-amqp1_0-{{connector:version}}.nar",
         "parallelism": 1,
         "configs":
         {
@@ -71,7 +87,6 @@ You can create a configuration file (JSON or YAML) to set the following properti
             "queue": "user-op-queue-pulsar"
         }
     }
-    ```
 
 * YAML
 
@@ -81,7 +96,7 @@ You can create a configuration file (JSON or YAML) to set the following properti
     name: "amqp1_0-sink"
     inputs: 
       - "user-op-queue-topic"
-    archive: "connectors/pulsar-io-amqp1_0-{version}.nar"
+    archive: "connectors/pulsar-io-amqp1_0-{{connector:version}}.nar"
     parallelism: 1
     
     configs:
@@ -93,30 +108,78 @@ You can create a configuration file (JSON or YAML) to set the following properti
         queue: "user-op-queue-pulsar"
     ```
 
+## Configure it with Function Mesh
+
+You can submit a [CustomResourceDefinitions (CRD)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) to create an AMQP1_0 sink connector. Using CRD makes Function Mesh naturally integrate with the Kubernetes ecosystem. For more information about Pulsar source CRD configurations, see [here](https://functionmesh.io/docs/connectors/io-crd-config/source-crd-config).
+
+You can define a CRD file (YAML) to set the properties as below.
+
+```yaml
+apiVersion: compute.functionmesh.io/v1alpha1
+kind: Sink
+metadata:
+  name: amqp-sink-sample
+spec:
+  image: streamnative/pulsar-io-amqp-1-0:{{connector:version}}
+  className: org.apache.pulsar.ecosystem.io.amqp.AmqpSink
+  replicas: 1
+  input:
+    topics: 
+    - persistent://public/default/user-op-queue-topic
+    typeClassName: “java.nio.ByteBuffer”
+    customSchemaSources:
+      “persistent://public/default/user-op-queue-topic”: “org.apache.pulsar.client.impl.schema.ByteBufferSchema”
+  sinkConfig:
+    protocol: "amqp"
+    host: "localhost"
+    port: "5672"
+    username: "guest"
+    password: "guest"
+    queue: "user-op-queue-pulsar"
+  pulsar:
+    pulsarConfig: "test-pulsar-sink-config"
+  resources:
+    limits:
+    cpu: "0.2"
+    memory: 1.1G
+    requests:
+    cpu: "0.1"
+    memory: 1G
+  java:
+    jar: connectors/pulsar-io-amqp1_0-{{connector:version}}.nar
+  clusterName: test-pulsar
+  autoAck: true
+```
+
 # How to use
 
-You can use the AMQP1_0 sink connector as a non built-in connector or a built-in connector as below. 
+You can use the AMQP1_0 sink connector with Function Worker or Function Mesh.
 
-## Use as non built-in connector 
+## Use it with Function Worker
+
+You can use the AMQP1_0 source connector as a non built-in connector or a built-in connector.
+
+### Use it as non built-in connector 
 
 If you already have a Pulsar cluster, you can use the AMQP1_0 sink connector as a non built-in connector directly.
 
 This example shows how to create an AMQP1_0 sink connector on a Pulsar cluster using the command [`pulsar-admin sinks create`](http://pulsar.apache.org/tools/pulsar-admin/2.8.0-SNAPSHOT/#-em-create-em--24).
 
-
 ```
 PULSAR_HOME/bin/pulsar-admin sinks create \
 --name amqp1_0-sink \
---archive pulsar-io-amqp1_0-{version}.nar \
+--archive pulsar-io-amqp1_0-{{connector:version}}.nar \
 --classname org.apache.pulsar.ecosystem.io.amqp.AmqpSink \
 --sink-config-file amqp-sink-config.yaml
 ```
 
-## Use as built-in connector
+### Use it as built-in connector
 
-You can make the AMQP1_0 sink connector as a built-in connector and use it on standalone cluster, on-premises cluster, or K8S cluster.
+You can make the AMQP1_0 sink connector as a built-in connector and  use it on a standalone cluster or on-premises cluster.
 
-### Standalone cluster
+#### Standalone cluster
+
+This example describes how to use the AMQP1_0 sink connector to pull data from Pulsar topics and persist data to AMQP in standalone mode.
 
 1. Prepare AMQP service using Solace.
 
@@ -127,21 +190,24 @@ You can make the AMQP1_0 sink connector as a built-in connector and use it on st
 2. Copy the NAR package of the AMQP1_0 sink connector to the Pulsar connectors directory.
 
     ```
-    cp pulsar-io-amqp1_0-{version}.nar
-    $PULSAR_HOME/connectors/pulsar-io-amqp1_0-{version}.nar
+    cp pulsar-io-amqp1_0-{{connector:version}}.nar $PULSAR_HOME/connectors/pulsar-io-amqp1_0-{{connector:version}}.nar
     ```
 
 3. Start Pulsar in standalone mode.
+
+    **Input**
 
     ```
     PULSAR_HOME/bin/pulsar standalone
     ```
 
-   You can find the similar logs as below. 
+    **Output**
+
+    You can find the similar logs below.
 
     ```
     Searching for connectors in /Volumes/other/apache-pulsar-2.8.0-SNAPSHOT/./connectors
-    Found connector ConnectorDefinition(name=amqp1_0, description=AMQP1_0 source and AMQP1_0 connector, sourceClass=org.apache.pulsar.ecosystem.io.amqp.AmqpSource, sinkClass=org.apache.pulsar.ecosystem.io.amqp.AmqpSink, sourceConfigClass=null, sinkConfigClass=null) from /Volumes/other/apache-pulsar-2.8.0-SNAPSHOT/./connectors/pulsar-io-amqp1_0-2.7.0.nar
+    Found connector ConnectorDefinition(name=amqp1_0, description=AMQP1_0 source and AMQP1_0 connector, sourceClass=org.apache.pulsar.ecosystem.io.amqp.AmqpSource, sinkClass=org.apache.pulsar.ecosystem.io.amqp.AmqpSink, sourceConfigClass=null, sinkConfigClass=null) from /Volumes/other/apache-pulsar-2.8.0-SNAPSHOT/./connectors/pulsar-io-amqp1_0-{{connector:version}}.nar
     Searching for functions in /Volumes/other/apache-pulsar-2.8.0-SNAPSHOT/./functions
     ```
 
@@ -156,7 +222,7 @@ You can make the AMQP1_0 sink connector as a built-in connector and use it on st
     ```
 
     **Output**
-
+    
     ```
     "Created successfully"
     ```
@@ -257,7 +323,7 @@ You can make the AMQP1_0 sink connector as a built-in connector and use it on st
     }
     ```
 
-    Check the sink status.
+Check the sink status.
 
     **Input**
 
@@ -290,20 +356,20 @@ You can make the AMQP1_0 sink connector as a built-in connector and use it on st
     }
     ```
 
-### On-premises cluster
+#### On-premise cluster
 
 This example explains how to create an AMQP1_0 sink connector on an on-premises cluster.
 
 1. Copy the NAR package of the AMQP1_0 connector to the Pulsar connectors directory.
 
     ```
-    cp pulsar-io-amqp1_0-{version}.nar $PULSAR_HOME/connectors/pulsar-io-amqp1_0-{version}.nar
+    cp pulsar-io-amqp1_0-{{connector:version}}.nar $PULSAR_HOME/connectors/pulsar-io-amqp1_0-{{connector:version}}.nar
     ```
 
 2. Reload all [built-in connectors](https://pulsar.apache.org/docs/en/next/io-connectors/).
 
     ```
-    PULSAR_HOME/bin/pulsar-admin sinks reload
+    PULSAR_HOME/bin/pulsar-admin sources reload
     ```
 
 3. Check whether the AMQP1_0 sink connector is available on the list or not.
@@ -319,46 +385,92 @@ This example explains how to create an AMQP1_0 sink connector on an on-premises 
     --sink-type amqp1_0 \
     --sink-config-file amqp-sink-config.yaml \
     --name amqp1_0-sink
+    ```	
+
+## Use it with Function Mesh
+
+This example demonstrates how to create an AMQP1_0 sink connector through Function Mesh.
+
+### Prerequisites
+
+- Create and connect to a [Kubernetes cluster](https://kubernetes.io/).
+
+- Create a [Pulsar cluster](https://pulsar.apache.org/docs/en/kubernetes-helm/) in the Kubernetes cluster.
+
+- [Install the Function Mesh Operator and CRD](https://functionmesh.io/docs/install-function-mesh/) into the Kubernetes cluster.
+
+- Prepare AMQP service. 
+  
+### Step
+
+1. Define the AMQP1_0 sink connector with a YAML file and save it as `sink-sample.yaml`.
+
+    This example shows how to publish the AMQP1_0 sink connector to Function Mesh with a Docker image.
+
+    ```yaml
+    apiVersion: compute.functionmesh.io/v1alpha1
+    kind: Sink
+    metadata:
+    name: amqp-sink-sample
+    spec:
+    image: streamnative/pulsar-io-amqp-1-0:{{connector:version}}
+    className: org.apache.pulsar.ecosystem.io.amqp.AmqpSink
+    replicas: 1
+    input:
+        topics: 
+        - persistent://public/default/user-op-queue-topic
+        typeClassName: “java.nio.ByteBuffer”
+        customSchemaSources:
+        “persistent://public/default/user-op-queue-topic”: “org.apache.pulsar.client.impl.schema.ByteBufferSchema”
+    sinkConfig:
+        protocol: "amqp"
+        host: "localhost"
+        port: "5672"
+        username: "guest"
+        password: "guest"
+        queue: "user-op-queue-pulsar"
+    pulsar:
+        pulsarConfig: "test-pulsar-sink-config"
+    resources:
+        limits:
+        cpu: "0.2"
+        memory: 1.1G
+        requests:
+        cpu: "0.1"
+        memory: 1G
+    java:
+        jar: connectors/pulsar-io-amqp1_0-{{connector:version}}.nar
+    clusterName: test-pulsar
+    autoAck: true
     ```
 
-### K8S cluster
+2. Apply the YAML file to create the AMQP1_0 sink connector.
 
-This example demonstrates how to create an AMQP1_0 sink connector on a K8S cluster.
-
-1. Build a new image based on the Pulsar image with the AMQP1_0 sink connector and push the new image to your image registry. 
-
-    This example tags the new image as `streamnative/pulsar-amqp1_0:2.7.0`.
-
-    ```Dockerfile
-    FROM apachepulsar/pulsar-all:2.7.0
-    RUN curl https://github.com/streamnative/pulsar-io-amqp1-0/releases/download/v{version}/pulsar-io-amqp1_0-{version}.nar -o /pulsar/connectors/pulsar-io-amqp1_0-{version}.nar
-    ```
-
-2. Extract the previous `--set` arguments from K8S to the `pulsar.yaml` file.
+    **Input**
 
     ```
-    helm get values <release-name> > pulsar.yaml
+    kubectl apply -f  <path-to-sink-sample.yaml>
     ```
 
-3. Replace the `images` section in the `pulsar.yaml` file with the `images` section of `streamnative/pulsar-amqp1_0:2.7.0`.
-
-4. Upgrade the K8S cluster with the `pulsar.yaml` file.
+    **Output**
 
     ```
-    helm upgrade <release-name> streamnative/pulsar \
-        --version <new version> \
-        -f pulsar.yaml
+    sink.compute.functionmesh.io/amqp-sink-sample created
     ```
 
-    > **Tip**
-    >
-    > For more information about how to upgrade a Pulsar cluster with Helm, see [Upgrade Guide](https://docs.streamnative.io/platform/latest/install-and-upgrade/helm/install/upgrade).
+3. Check whether the AMQP1_0 sink connector is created successfully.
 
-5. Create an AMQP1_0 sink connector on a Pulsar cluster using the [`pulsar-admin sinks create`](http://pulsar.apache.org/tools/pulsar-admin/2.8.0-SNAPSHOT/#-em-create-em--24) command.
+    **Input**
 
     ```
-    PULSAR_HOME/bin/pulsar-admin sinks create \
-    --sink-type amqp1_0 \
-    --sink-config-file amqp-sink-config.yaml \
-    --name amqp1_0-sink
+    kubectl get all
     ```
+
+    **Output**
+
+    ```
+    NAME                                READY   STATUS      RESTARTS   AGE
+    pod/amqp-sink-sample-0               1/1     Running     0          77s
+    ```
+
+    After that, you can produce and consume messages using the AMQP1_0 sink connector between Pulsar and AMQP1_0.
