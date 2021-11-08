@@ -16,7 +16,7 @@ jobs:
 
       - name: Login streamnative docker hub
         run: docker login -u="${{ secrets.DOCKER_USER }}" -p="${{ secrets.DOCKER_PASSWORD }}"
-
+        
       - name: build connector
         run: |
           version=`./scripts/dev/get-project-version.py`
@@ -26,14 +26,7 @@ jobs:
           cp README.md ./pulsar-io-amqp1_0-readme.md
           echo "ls pulsar-io-*"
           ls pulsar-io-*
-
-      - name: publish
-        uses: skx/github-action-publish-binaries@release-0.11
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: 'pulsar-io-*'
-
+           
       - name: build and push docker image
         run: |
           PULSAR_VERSION=`./scripts/dev/get-project-version.py`
