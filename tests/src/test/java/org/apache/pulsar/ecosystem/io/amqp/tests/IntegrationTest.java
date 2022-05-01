@@ -91,7 +91,7 @@ public class IntegrationTest {
         Container.ExecResult execResult = standaloneContainer.execInContainer(
                 "/pulsar/bin/pulsar-admin",
                 "sources", "create", "--source-config-file", "/pulsar/amqp1_0-source-config.yaml");
-        Assert.assertEquals(execResult.getStdout().trim(), "\"Created successfully\"");
+        Assert.assertTrue(execResult.getStdout().trim().contains("Created successfully"));
         waitForConnectorRunning(standaloneContainer, true, "amqp1_0-source");
         log.info("amqp1_0 source is running");
 
