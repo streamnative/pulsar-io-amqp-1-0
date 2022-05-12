@@ -18,10 +18,10 @@
  */
 package org.apache.pulsar.ecosystem.io.amqp.tests;
 
+import com.google.common.collect.Lists;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.DeliveryMode;
@@ -39,6 +39,7 @@ import org.apache.qpid.jms.JmsConnectionFactory;
 import org.apache.qpid.jms.JmsQueue;
 import org.apache.qpid.jms.message.JmsObjectMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
+import org.awaitility.Awaitility;
 import org.junit.Assert;
 import org.junit.Test;
 import org.testcontainers.containers.BindMode;
@@ -53,6 +54,8 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.node.ObjectNode;
  */
 @Slf4j
 public class IntegrationTest {
+
+    private final AtomicBoolean testSuccess = new AtomicBoolean(false);
 
     @Test(timeout = 1000 * 60 * 5)
     public void test() throws Exception {
@@ -79,9 +82,7 @@ public class IntegrationTest {
 
         SolaceContainer solaceContainer = new SolaceContainer(SolaceContainer.IMAGE);
         solaceContainer.setNetwork(network);
-        List<String> list = new ArrayList<>();
-        list.add("solace");
-        solaceContainer.setNetworkAliases(list);
+        solaceContainer.setNetworkAliases(Lists.newArrayList("solace"));
         solaceContainer.withExposedPorts(5672, 8080);
         solaceContainer.withEnv("username_admin_globalaccesslevel", "admin");
         solaceContainer.withEnv("username_admin_password", "admin");
@@ -114,20 +115,20 @@ public class IntegrationTest {
         log.info("amqp1_0 sink is running");
 
         String solaceRemoteUri = "amqp://" + solaceContainer.getHost() + ":" + solaceContainer.getMappedPort(5672);
+        int messageCount = 100;
 
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        log.info("start verify data");
-        verifyData(100, solaceRemoteUri, countDownLatch);
+        verifyData(messageCount, solaceRemoteUri);
+        generateData(messageCount, solaceRemoteUri);
 
-        log.info("start generate data");
-        generateData(100, solaceRemoteUri);
-
-        countDownLatch.await();
+        Awaitility.await().pollInterval(1, TimeUnit.SECONDS)
+                .atMost(30, TimeUnit.SECONDS)
+                .until(testSuccess::get);
         log.info("Finish the integration test.");
     }
 
     private void generateData(int count, String remoteUri) {
         try {
+            log.info("start generate data");
             ConnectionFactory factory = new JmsConnectionFactory("guest", "guest", remoteUri);
             Destination queue = new JmsQueue("user-op-queue");
 
@@ -164,8 +165,9 @@ public class IntegrationTest {
         }
     }
 
-    private void verifyData(int count, String remoteUri, CountDownLatch countDownLatch) {
+    private void verifyData(int count, String remoteUri) {
         new Thread(() -> {
+            log.info("start verify data");
             try {
                 ConnectionFactory factory = new JmsConnectionFactory("guest", "guest", remoteUri);
                 Destination queue = new JmsQueue("user-op-queue-pulsar");
@@ -193,7 +195,7 @@ public class IntegrationTest {
                 }
                 log.info("Received {} messages in token {} ms.", count, System.currentTimeMillis() - start);
                 connection.close();
-                countDownLatch.countDown();
+                testSuccess.set(true);
             } catch (Exception exp) {
                 log.error("Caught exception when receiving messages, exiting.", exp);
                 Assert.fail("Failed to receive messages, error message: " + exp.getMessage());
