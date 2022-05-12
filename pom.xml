@@ -46,7 +46,7 @@
     <testRetryCount>2</testRetryCount>
 
     <!-- connector dependencies -->
-    <jackson.version>2.9.10.7</jackson.version>
+    <jackson.version>2.12.6.1</jackson.version>
     <lombok.version>1.16.22</lombok.version>
     <pulsar.version>2.8.0-rc-202105251229</pulsar.version>
     <qpid.version>0.56.0</qpid.version>
