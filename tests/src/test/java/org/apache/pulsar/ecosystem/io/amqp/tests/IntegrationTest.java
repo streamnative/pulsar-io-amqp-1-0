@@ -110,7 +110,7 @@ public class IntegrationTest {
                 "/pulsar/amqp1_0-sink-config.yaml"
                 );
         log.info("sink exec result: {}", execResult.toString());
-        Assert.assertEquals(execResult.getStdout().trim(), "\"Created successfully\"");
+        Assert.assertTrue(execResult.getStdout().trim().contains("Created successfully"));
         waitForConnectorRunning(standaloneContainer, false, "amqp1_0-sink");
         log.info("amqp1_0 sink is running");
 
