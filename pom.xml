@@ -41,7 +41,7 @@
     <java.version>1.8</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+    <redirectTestOutputToFile>false</redirectTestOutputToFile>
     <spotbugs-annotations.version>3.1.8</spotbugs-annotations.version>
     <testRetryCount>2</testRetryCount>
 
@@ -58,6 +58,7 @@
     <mockito.version>2.22.0</mockito.version>
     <powermock.version>2.0.0-beta.5</powermock.version>
     <testcontainers.version>1.15.2</testcontainers.version>
+    <awaitility.version>4.2.0</awaitility.version>
 
     <!-- build plugin dependencies -->
     <license.plugin.version>3.0</license.plugin.version>
@@ -130,6 +131,11 @@
         <groupId>org.testcontainers</groupId>
         <artifactId>testcontainers</artifactId>
         <version>${testcontainers.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.awaitility</groupId>
+        <artifactId>awaitility</artifactId>
+        <version>${awaitility.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -208,6 +214,11 @@
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>testcontainers</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
