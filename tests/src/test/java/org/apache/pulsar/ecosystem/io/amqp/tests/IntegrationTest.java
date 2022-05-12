@@ -18,8 +18,9 @@
  */
 package org.apache.pulsar.ecosystem.io.amqp.tests;
 
-import com.google.common.collect.Lists;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.jms.Connection;
@@ -82,7 +83,9 @@ public class IntegrationTest {
 
         SolaceContainer solaceContainer = new SolaceContainer(SolaceContainer.IMAGE);
         solaceContainer.setNetwork(network);
-        solaceContainer.setNetworkAliases(Lists.newArrayList("solace"));
+        List<String> aliases = new ArrayList<>();
+        aliases.add("solace");
+        solaceContainer.setNetworkAliases(aliases);
         solaceContainer.withExposedPorts(5672, 8080);
         solaceContainer.withEnv("username_admin_globalaccesslevel", "admin");
         solaceContainer.withEnv("username_admin_password", "admin");
