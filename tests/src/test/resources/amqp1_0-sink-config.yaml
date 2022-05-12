@@ -24,7 +24,7 @@ inputs:
   - "user-op-queue-topic"
 archive: "connectors/pulsar-io-amqp1_0.nar"
 parallelism: 1
-
+sourceSubscriptionPosition: "Earliest"
 configs:
     protocol: "amqp"
     host: "solace"
