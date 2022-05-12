@@ -56,6 +56,7 @@ public class IntegrationTest {
 
     @Test(timeout = 1000 * 60 * 5)
     public void test() throws Exception {
+        log.info("Start integration test for amqp-1-0 connector.");
         Network network = Network.newNetwork();
 
         PulsarStandaloneContainer standaloneContainer = new PulsarStandaloneContainer(PulsarStandaloneContainer.IMAGE);
