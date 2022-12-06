@@ -31,8 +31,8 @@ jobs:
     - name: Style check
       run: mvn checkstyle:check
 
-    - name: Spotbugs check
-      run: mvn spotbugs:check
+#    - name: Spotbugs check
+#      run: mvn spotbugs:check
 
     - name: io-amqp1_0-impl test after build
       run: mvn test -DfailIfNoTests=false -pl io-amqp1_0-impl
