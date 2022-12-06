@@ -18,6 +18,10 @@
  */
 package org.apache.pulsar.ecosystem.io.amqp.tests;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,13 +45,12 @@ import org.apache.qpid.jms.JmsQueue;
 import org.apache.qpid.jms.message.JmsObjectMessage;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.awaitility.Awaitility;
-import org.junit.Assert;
-import org.junit.Test;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.Network;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.node.ObjectNode;
+import org.testng.annotations.Test;
 
 
 /**
@@ -58,7 +61,7 @@ public class IntegrationTest {
 
     private final AtomicBoolean testSuccess = new AtomicBoolean(false);
 
-    @Test(timeout = 1000 * 60 * 5)
+    @Test(timeOut = 1000 * 60 * 5)
     public void test() throws Exception {
         log.info("Start integration test for amqp-1-0 connector.");
         Network network = Network.newNetwork();
@@ -96,7 +99,7 @@ public class IntegrationTest {
         Container.ExecResult execResult = standaloneContainer.execInContainer(
                 "/pulsar/bin/pulsar-admin",
                 "sources", "create", "--source-config-file", "/pulsar/amqp1_0-source-config.yaml");
-        Assert.assertTrue(execResult.getStdout().trim().contains("Created successfully"));
+        assertTrue(execResult.getStdout().trim().contains("Created successfully"));
         waitForConnectorRunning(standaloneContainer, true, "amqp1_0-source");
         log.info("amqp1_0 source is running");
 
@@ -113,7 +116,7 @@ public class IntegrationTest {
                 "/pulsar/amqp1_0-sink-config.yaml"
                 );
         log.info("sink exec result: {}", execResult.toString());
-        Assert.assertTrue(execResult.getStdout().trim().contains("Created successfully"));
+        assertTrue(execResult.getStdout().trim().contains("Created successfully"));
         waitForConnectorRunning(standaloneContainer, false, "amqp1_0-sink");
         log.info("amqp1_0 sink is running");
 
@@ -185,13 +188,13 @@ public class IntegrationTest {
                 for (int i = 1; i <= count; i++) {
                     Message message = messageConsumer.receive();
                     if (message instanceof JmsTextMessage) {
-                        Assert.assertEquals(((JmsTextMessage) message).getText(), "Text - " + i);
+                        assertEquals(((JmsTextMessage) message).getText(), "Text - " + i);
                         log.info("receive text message {} content {}", i, ((JmsTextMessage) message).getText());
                     } else if (message instanceof JmsObjectMessage) {
-                        Assert.assertTrue(((JmsObjectMessage) message).getObject() instanceof User);
+                        assertTrue(((JmsObjectMessage) message).getObject() instanceof User);
                         User user = (User) ((JmsObjectMessage) message).getObject();
-                        Assert.assertEquals(user.name, "jack - " + i);
-                        Assert.assertEquals(user.age, i + 10);
+                        assertEquals(user.name, "jack - " + i);
+                        assertEquals(user.age, i + 10);
                         log.info("receive object message {} content {}",
                                 i, ((JmsObjectMessage) message).getObject().toString());
                     }
@@ -201,7 +204,7 @@ public class IntegrationTest {
                 testSuccess.set(true);
             } catch (Exception exp) {
                 log.error("Caught exception when receiving messages, exiting.", exp);
-                Assert.fail("Failed to receive messages, error message: " + exp.getMessage());
+                fail("Failed to receive messages, error message: " + exp.getMessage());
             }
         }).start();
     }
