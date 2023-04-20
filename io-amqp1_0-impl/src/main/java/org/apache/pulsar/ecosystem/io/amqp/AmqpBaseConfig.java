@@ -45,6 +45,8 @@ public class AmqpBaseConfig {
     private String queue;
     private String topic;
     private boolean onlyTextMessage = false;
+     // Default session mode
+    private int sessionMode = JMSContext.AUTO_ACKNOWLEDGE
 
     public static AmqpBaseConfig load(Map<String, Object> config) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -75,6 +77,10 @@ public class AmqpBaseConfig {
 
     public String getUri() {
         return this.protocol + "://" + host + ":" + port;
+    }
+
+    public int getSessionMode() {
+        return sessionMode;
     }
 
     public JmsDestination getDestination() {

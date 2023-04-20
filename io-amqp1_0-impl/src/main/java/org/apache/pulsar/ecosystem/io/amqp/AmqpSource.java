@@ -26,8 +26,10 @@ import java.util.Optional;
 import javax.jms.Destination;
 import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
+import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,7 @@ import org.apache.pulsar.io.core.PushSource;
 import org.apache.pulsar.io.core.SourceContext;
 import org.apache.qpid.jms.JmsConnectionFactory;
 import org.apache.qpid.jms.message.JmsMessage;
+import org.apache.qpid.jms.message.JmsMessageSupport;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.apache.qpid.jms.provider.amqp.message.AmqpCodec;
 import org.apache.qpid.jms.provider.amqp.message.AmqpJmsMessageFacade;
@@ -64,7 +67,10 @@ public class AmqpSource extends PushSource<ByteBuffer> {
         } else {
             factory = new JmsConnectionFactory(config.getUri());
         }
-        jmsContext = factory.createContext();
+        log.info("config.getUri(): " + config.getUri());
+        log.info("factory.getRemoteURI(): " + factory.getRemoteURI());
+        log.info("config.getSessionMode(): " + config.getSessionMode());
+        jmsContext = factory.createContext(config.getSessionMode());
 
         Destination destination = config.getDestination();
         if (destination == null) {
@@ -91,15 +97,17 @@ public class AmqpSource extends PushSource<ByteBuffer> {
                 if (config.isOnlyTextMessage()) {
                     record = new QpidJmsRecord(
                             Optional.empty(),
-                            ByteBuffer.wrap(((JmsTextMessage) message).getText().getBytes(StandardCharsets.UTF_8)));
+                            ByteBuffer.wrap(((JmsTextMessage) message).getText().getBytes(StandardCharsets.UTF_8)),
+                            message);
                 } else {
                     ByteBuf byteBuf = AmqpCodec.encodeMessage(
                             (AmqpJmsMessageFacade) ((JmsMessage) message).getFacade());
-                    record = new QpidJmsRecord(Optional.empty(), byteBuf.nioBuffer());
+                    record = new QpidJmsRecord(Optional.empty(), byteBuf.nioBuffer(), message);
                 }
                 pushSource.consume(record);
             } catch (Exception e) {
                 log.error("Failed to consume qpid jms message.", e);
+                throw new RuntimeException(e);
             }
         }
     }
@@ -111,10 +119,35 @@ public class AmqpSource extends PushSource<ByteBuffer> {
     private static class QpidJmsRecord implements Record<ByteBuffer> {
         private final Optional<String> key;
         private final ByteBuffer value;
+        private final Message jmsMessage;
 
         @Override
         public Schema<ByteBuffer> getSchema() {
             return Schema.BYTEBUFFER;
+        }
+
+        @Override
+        public void ack() {
+            try {
+                jmsMessage.acknowledge();
+            } catch (JMSException e) {
+                log.error("Failed to acknowledge qpid jms message.", e);
+            }
+        }
+
+        @Override
+        public void fail() {
+            try {
+                if (jmsMessage instanceof JmsMessage) {
+                    JmsMessage qpidJmsMessage = (JmsMessage) jmsMessage;
+                    if (qpidJmsMessage.getAcknowledgeCallback() != null) {
+                        qpidJmsMessage.getAcknowledgeCallback().setAckType(JmsMessageSupport.REJECTED);
+                        qpidJmsMessage.acknowledge();
+                    }
+                }
+            } catch (JMSException e) {
+                log.error("Failed to reject qpid jms message.", e);
+            }
         }
     }
 
