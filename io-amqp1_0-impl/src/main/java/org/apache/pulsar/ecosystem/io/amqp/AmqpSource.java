@@ -29,7 +29,6 @@ import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +42,6 @@ import org.apache.qpid.jms.message.JmsMessageSupport;
 import org.apache.qpid.jms.message.JmsTextMessage;
 import org.apache.qpid.jms.provider.amqp.message.AmqpCodec;
 import org.apache.qpid.jms.provider.amqp.message.AmqpJmsMessageFacade;
-
 
 /**
  * QpidJms source connector.
@@ -67,9 +65,6 @@ public class AmqpSource extends PushSource<ByteBuffer> {
         } else {
             factory = new JmsConnectionFactory(config.getUri());
         }
-        log.info("config.getUri(): " + config.getUri());
-        log.info("factory.getRemoteURI(): " + factory.getRemoteURI());
-        log.info("config.getSessionMode(): " + config.getSessionMode());
         jmsContext = factory.createContext(config.getSessionMode());
 
         Destination destination = config.getDestination();
@@ -156,5 +151,4 @@ public class AmqpSource extends PushSource<ByteBuffer> {
         this.jmsConsumer.close();
         this.jmsContext.close();
     }
-
 }

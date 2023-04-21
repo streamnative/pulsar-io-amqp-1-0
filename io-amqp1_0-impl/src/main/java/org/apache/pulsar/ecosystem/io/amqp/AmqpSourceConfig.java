@@ -21,6 +21,7 @@ package org.apache.pulsar.ecosystem.io.amqp;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Map;
+import javax.jms.JMSContext;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -34,9 +35,15 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class AmqpSourceConfig extends AmqpBaseConfig {
 
+    // Default session mode
+    private int sessionMode = JMSContext.AUTO_ACKNOWLEDGE;
+
     public static AmqpSourceConfig load(Map<String, Object> config) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.readValue(objectMapper.writeValueAsBytes(config), AmqpSourceConfig.class);
     }
 
+    public int getSessionMode() {
+        return sessionMode;
+    }
 }

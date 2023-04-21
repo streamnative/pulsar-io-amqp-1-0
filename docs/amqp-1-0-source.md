@@ -49,16 +49,17 @@ Before using the AMQP1_0 source connector, you need to configure it.
 
 You can create a configuration file (JSON or YAML) to set the following properties.
 
-| Name | Type|Required | Default | Description 
-|------|----------|----------|---------|-------------|
-| `protocol` |String| true | "amqp" | The AMQP protocol. |
-| `host` | String| true | " " (empty string) | The AMQP service host. |
-| `port` | int |true | 5672 | The AMQP service port. |
-| `username` | String|false | " " (empty string) | The username used to authenticate to AMQP1_0. |
-| `password` | String|false | " " (empty string) | The password used to authenticate to AMQP1_0. |
-| `queue` | String|false | " " (empty string) | The queue name that messages should be read from or written to. |
-| `topic` | String|false | " " (empty string) | The topic name that messages should be read from or written to. |
-| `onlyTextMessage` | boolean | false | false | If it is set to `true`, the AMQP message type must be set to `TextMessage`. Pulsar consumers can consume the messages with schema ByteBuffer. |
+| Name              | Type    | Required | Default              | Description                                                                                                                                                                                                                                                  |
+|-------------------|---------|----------|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `protocol`        | String  | true     | "amqp"               | The AMQP protocol.                                                                                                                                                                                                                                           |
+| `host`            | String  | true     | " " (empty string)   | The AMQP service host.                                                                                                                                                                                                                                       |
+| `port`            | int     | true     | 5672                 | The AMQP service port.                                                                                                                                                                                                                                       |
+| `username`        | String  | false    | " " (empty string)   | The username used to authenticate to AMQP1_0.                                                                                                                                                                                                                |
+| `password`        | String  | false    | " " (empty string)   | The password used to authenticate to AMQP1_0.                                                                                                                                                                                                                |
+| `queue`           | String  | false    | " " (empty string)   | The queue name that messages should be read from or written to.                                                                                                                                                                                              |
+| `topic`           | String  | false    | " " (empty string)   | The topic name that messages should be read from or written to.                                                                                                                                                                                              |
+| `onlyTextMessage` | boolean | false    | false                | If it is set to `true`, the AMQP message type must be set to `TextMessage`. Pulsar consumers can consume the messages with schema ByteBuffer.                                                                                                                |
+| `sessionMode`     | int     | false    | 1 (AUTO_ACKNOWLEDGE) | Sets the sessionMode of the jmsContext in the AmqpSource, see [JMSContext](https://docs.oracle.com/javaee/7/api/javax/jms/JMSContext.html) for other options (AUTO_ACKNOWLEDGE (1), CLIENT_ACKNOWLEDGE (2), DUPS_OK_ACKNOWLEDGE (3), SESSION_TRANSACTED (4)) |
 
 ## Configure it with Function Worker
 
@@ -82,7 +83,8 @@ You can create a configuration file (JSON or YAML) to set the properties as belo
             "port": "5672",
             "username": "guest",
             "password": "guest",
-            "queue": "user-op-queue"
+            "queue": "user-op-queue",
+            "sessionMode": 2
         }
     }
     ```
@@ -104,6 +106,7 @@ You can create a configuration file (JSON or YAML) to set the properties as belo
             username: "guest"
             password: "guest"
             queue: "user-op-queue"
+            sessionMode: 2
     ```
 
 ## Configure it with Function Mesh
@@ -131,6 +134,7 @@ spec:
     username: "guest"
     password: "guest"
     queue: "user-op-queue"
+    sessionMode: 2
   pulsar:
     pulsarConfig: "test-pulsar-source-config"
   resources:
@@ -413,6 +417,7 @@ This example demonstrates how to create an AMQP1_0 source connector through Func
         username: "guest"
         password: "guest"
         queue: "user-op-queue"
+        sessionMode: 2
     pulsar:
         pulsarConfig: "test-pulsar-source-config"
     resources:
