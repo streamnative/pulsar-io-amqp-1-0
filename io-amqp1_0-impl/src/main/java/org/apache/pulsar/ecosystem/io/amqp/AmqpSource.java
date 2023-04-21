@@ -102,7 +102,7 @@ public class AmqpSource extends PushSource<ByteBuffer> {
                 pushSource.consume(record);
             } catch (Exception e) {
                 log.error("Failed to consume qpid jms message.", e);
-                throw new RuntimeException(e);
+                throw new CouldNotProcessMessageException(e);
             }
         }
     }
