@@ -51,15 +51,32 @@ You can create a configuration file (JSON or YAML) to set the following properti
 
 | Name | Type|Required | Default | Description 
 |------|----------|----------|---------|-------------|
-| `protocol` |String| true | "amqp" | The AMQP protocol. |
-| `host` | String| true | " " (empty string) | The AMQP service host. |
-| `port` | int |true | 5672 | The AMQP service port. |
+| `protocol` |String| required if connection is not used | "amqp" | [deprecated: use connection instead] The AMQP protocol. |
+| `host` | String| required if connection is not used | " " (empty string) | [deprecated: use connection instead] The AMQP service host. |
+| `port` | int | required if connection is not used | 5672 | [deprecated: use connection instead] The AMQP service port. |
+| `connection` | Connection | required if protocol, host, port is not used | " "  (empty string) | The connection details. |
 | `username` | String|false | " " (empty string) | The username used to authenticate to ActiveMQ. |
 | `password` | String|false | " " (empty string) | The password used to authenticate to ActiveMQ. |
 | `queue` | String|false | " " (empty string) | The queue name that messages should be read from or written to. |
 | `topic` | String|false | " " (empty string) | The topic name that messages should be read from or written to. |
 | `activeMessageType` | String|false |0 | The ActiveMQ message simple class name. |
 | `onlyTextMessage` | boolean | false | false | If it is set to `true`, the AMQP message type must be set to `TextMessage`. Pulsar consumers can consume the messages with schema ByteBuffer. |
+
+A Connection object can be specified as follows:
+
+| Name | Type|Required | Default | Description 
+|------|----------|----------|---------|-------------|
+| `useFailover` |boolean| true | false | If it is set to true, the connection will be created from the uris provided under uris, using qpid's failover connection factory. |
+| `uris` | list of ConnectionUri| true | " " (empty string) | A list of ConnectionUri objects. When useFailover is set to true 1 or more should be provided. Currently only 1 uri is supported when useFailover is set to false|
+
+A ConnectionUri object can be specified as follows:
+| Name | Type|Required | Default | Description 
+|------|----------|----------|---------|-------------|
+| `protocol` |String| true | " " (empty string) | The AMQP protocol. |
+| `host` | String| true | " " (empty string) | The AMQP service host. |
+| `port` | int |true | 0 | The AMQP service port. |
+| `urlOptions` | List of String | false | " " (empty string) | A list of url-options (e.g. <key=value>). The url options wil be joined using an '&', prefixed with a '?' and added to the end of the uri  |
+
 
 ## Configure it with Function Worker
 
@@ -68,6 +85,8 @@ You can create a configuration file (JSON or YAML) to set the properties as belo
 **Example**
 
 * JSON 
+
+[deprecated]
 
     ```json
     {
@@ -87,8 +106,39 @@ You can create a configuration file (JSON or YAML) to set the properties as belo
             "queue": "user-op-queue-pulsar"
         }
     }
+    
+Or:
+    
+    ```json
+    {
+        "tenant": "public",
+        "namespace": "default",
+        "name": "amqp1_0-sink",
+        "inputs": ["user-op-queue-topic"],
+        "archive": "connectors/pulsar-io-amqp1_0-{{connector:version}}.nar",
+        "parallelism": 1,
+        "configs":
+        {
+            "connection": {
+                "useFailover": true,
+                "uris": [{
+                        "protocol": "amqp",
+                        "host": "localhost",
+                        "port": 5672,
+                        "urlOptions": ["transport.tcpKeepAlive=true"]
+                    }
+                ]
+            },
+            "username": "guest",
+            "password": "guest",
+            "queue": "user-op-queue-pulsar"
+        }
+    }
 
 * YAML
+
+[deprecated]
+
 
     ```yaml
     tenant: "public"
@@ -107,12 +157,41 @@ You can create a configuration file (JSON or YAML) to set the properties as belo
         password: "guest"
         queue: "user-op-queue-pulsar"
     ```
+    
+Or:
+    
+    ```yaml
+    tenant: "public"
+    namespace: "default"
+    name: "amqp1_0-sink"
+    inputs: 
+      - "user-op-queue-topic"
+    archive: "connectors/pulsar-io-amqp1_0-{{connector:version}}.nar"
+    parallelism: 1
+    
+    configs:
+        connection: {
+            useFailover: true,
+            uris: [{
+                    protocol: "amqp",
+                    host: "localhost",
+                    port: 5672,
+                    urlOptions: ["transport.tcpKeepAlive=true"]
+                }
+            ]
+        }
+        username: "guest"
+        password: "guest"
+        queue: "user-op-queue-pulsar"
+    ```
 
 ## Configure it with Function Mesh
 
 You can submit a [CustomResourceDefinitions (CRD)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) to create an AMQP1_0 sink connector. Using CRD makes Function Mesh naturally integrate with the Kubernetes ecosystem. For more information about Pulsar source CRD configurations, see [here](https://functionmesh.io/docs/connectors/io-crd-config/source-crd-config).
 
 You can define a CRD file (YAML) to set the properties as below.
+
+[Deprecated]
 
 ```yaml
 apiVersion: compute.functionmesh.io/v1alpha1
@@ -133,6 +212,52 @@ spec:
     protocol: "amqp"
     host: "localhost"
     port: "5672"
+    username: "guest"
+    password: "guest"
+    queue: "user-op-queue-pulsar"
+  pulsar:
+    pulsarConfig: "test-pulsar-sink-config"
+  resources:
+    limits:
+    cpu: "0.2"
+    memory: 1.1G
+    requests:
+    cpu: "0.1"
+    memory: 1G
+  java:
+    jar: connectors/pulsar-io-amqp1_0-{{connector:version}}.nar
+  clusterName: test-pulsar
+  autoAck: true
+```
+
+Or:
+
+```yaml
+apiVersion: compute.functionmesh.io/v1alpha1
+kind: Sink
+metadata:
+  name: amqp-sink-sample
+spec:
+  image: streamnative/pulsar-io-amqp-1-0:{{connector:version}}
+  className: org.apache.pulsar.ecosystem.io.amqp.AmqpSink
+  replicas: 1
+  input:
+    topics: 
+    - persistent://public/default/user-op-queue-topic
+    typeClassName: “java.nio.ByteBuffer”
+    customSchemaSources:
+      “persistent://public/default/user-op-queue-topic”: “org.apache.pulsar.client.impl.schema.ByteBufferSchema”
+  sinkConfig:
+    connection: {
+        useFailover: true,
+        uris: [{
+                protocol: "amqp",
+                host: "localhost",
+                port: 5672,
+                urlOptions: ["transport.tcpKeepAlive=true"]
+            }
+        ]
+    }
     username: "guest"
     password: "guest"
     queue: "user-op-queue-pulsar"
@@ -443,6 +568,49 @@ This example demonstrates how to create an AMQP1_0 sink connector through Functi
     clusterName: test-pulsar
     autoAck: true
     ```
+
+    ```yaml
+    apiVersion: compute.functionmesh.io/v1alpha1
+    kind: Sink
+    metadata:
+    name: amqp-sink-sample
+    spec:
+    image: streamnative/pulsar-io-amqp-1-0:{{connector:version}}
+    className: org.apache.pulsar.ecosystem.io.amqp.AmqpSink
+    replicas: 1
+    input:
+        topics: 
+        - persistent://public/default/user-op-queue-topic
+        typeClassName: “java.nio.ByteBuffer”
+        customSchemaSources:
+        “persistent://public/default/user-op-queue-topic”: “org.apache.pulsar.client.impl.schema.ByteBufferSchema”
+    sinkConfig:
+        connection: {
+            useFailover: true,
+            uris: [{
+                    protocol: "amqp",
+                    host: "localhost",
+                    port: 5672,
+                    urlOptions: ["transport.tcpKeepAlive=true"]
+                }
+            ]
+        }
+        username: "guest"
+        password: "guest"
+        queue: "user-op-queue-pulsar"
+    pulsar:
+        pulsarConfig: "test-pulsar-sink-config"
+    resources:
+        limits:
+        cpu: "0.2"
+        memory: 1.1G
+        requests:
+        cpu: "0.1"
+        memory: 1G
+    java:
+        jar: connectors/pulsar-io-amqp1_0-{{connector:version}}.nar
+    clusterName: test-pulsar
+    autoAck: true
 
 2. Apply the YAML file to create the AMQP1_0 sink connector.
 

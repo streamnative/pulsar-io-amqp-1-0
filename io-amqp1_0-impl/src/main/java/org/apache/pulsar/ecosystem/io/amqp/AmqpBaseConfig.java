@@ -19,15 +19,15 @@
 package org.apache.pulsar.ecosystem.io.amqp;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.util.Map;
-import java.util.Objects;
+
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.apache.qpid.jms.JmsDestination;
 import org.apache.qpid.jms.JmsQueue;
 import org.apache.qpid.jms.JmsTopic;
-
 
 /**
  * QpidJms connector base config.
@@ -38,12 +38,15 @@ public class AmqpBaseConfig {
 
     private String username;
     private String password;
-    private String protocol;
+    @Deprecated
     private String host;
+    @Deprecated
+    private String protocol;
+    @Deprecated
     private int port;
-
     private String queue;
     private String topic;
+    public Connection connection;
     private boolean onlyTextMessage = false;
 
     public static AmqpBaseConfig load(Map<String, Object> config) throws IOException {
@@ -53,15 +56,23 @@ public class AmqpBaseConfig {
 
     public void validate() throws ConfigurationInvalidException {
 
-        Objects.requireNonNull(protocol, "The protocol property not set.");
-        Objects.requireNonNull(host, "The host property not set.");
-        if (port <= 0) {
-            throw new ConfigurationInvalidException("The configuration port is invalid.");
+        if (connection != null) {
+            if (isValidUrlComponentConfiguration()){
+                throw new ConfigurationInvalidException(
+                        "When connection is set, protocol, host, port should be empty.");
+            }
+            this.connection.validate();
+        }
+
+        if (connection == null && !isValidUrlComponentConfiguration()){
+            throw new ConfigurationInvalidException(
+                    "Protocol, host, port should be set when no connection is provided.");
         }
 
         if (StringUtils.isNotEmpty(queue) && StringUtils.isNotEmpty(topic)) {
             throw new ConfigurationInvalidException("The queue and topic couldn't be set at the same time.");
         }
+
         String destinationName = null;
         if (StringUtils.isNotEmpty(queue)) {
             destinationName = queue;
@@ -74,6 +85,9 @@ public class AmqpBaseConfig {
     }
 
     public String getUri() {
+        if (connection != null) {
+            return connection.getUri();
+        }
         return this.protocol + "://" + host + ":" + port;
     }
 
@@ -85,6 +99,13 @@ public class AmqpBaseConfig {
             destination = new JmsTopic(topic);
         }
         return destination;
+    }
+
+
+    private boolean isValidUrlComponentConfiguration() {
+        return StringUtils.isNotEmpty(protocol)
+                && StringUtils.isNotEmpty(host)
+                && port > 0;
     }
 
 }
