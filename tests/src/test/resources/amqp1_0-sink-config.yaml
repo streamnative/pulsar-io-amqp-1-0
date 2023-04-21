@@ -26,9 +26,14 @@ archive: "connectors/pulsar-io-amqp1_0.nar"
 parallelism: 1
 sourceSubscriptionPosition: "Earliest"
 configs:
-    protocol: "amqp"
-    host: "solace"
-    port: "5672"
+    connection:
+      useFailover: true
+      uris:
+        - protocol: "amqp"
+          host: "solace"
+          port: 5672
+          urlOptions:
+            - "transport.tcpKeepAlive=true"
     username: "guest"
     password: "guest"
     queue: "user-op-queue-pulsar"
