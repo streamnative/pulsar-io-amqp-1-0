@@ -15,7 +15,7 @@ You can get the AMQP1_0 sink connector using one of the following methods.
 
 ## Use it with Function Worker
 
-- Download the NAR package from [here](https://github.com/streamnative/pulsar-io-amqp-1-0/releases/download/v{{connector:version}}/pulsar-io-amqp1_0-{{connector:version}}.nar).
+- Download the NAR package from [here](https://github.com/streamnative/pulsar-io-amqp-1-0/releases/download/v3.0.0.1-rc1/pulsar-io-amqp1_0-3.0.0.1-rc1.nar).
 
 - Build it from the source code.
 
@@ -35,7 +35,7 @@ You can get the AMQP1_0 sink connector using one of the following methods.
 
         ```bash
         ls pulsar-io-amqp1_0/target
-        pulsar-io-amqp1_0-{{connector:version}}.nar
+        pulsar-io-amqp1_0-3.0.0.1-rc1.nar
         ```
 
 ## Use it with Function Mesh
@@ -75,7 +75,7 @@ You can create a configuration file (JSON or YAML) to set the properties as belo
         "namespace": "default",
         "name": "amqp1_0-sink",
         "inputs": ["user-op-queue-topic"],
-        "archive": "connectors/pulsar-io-amqp1_0-{{connector:version}}.nar",
+        "archive": "connectors/pulsar-io-amqp1_0-3.0.0.1-rc1.nar",
         "parallelism": 1,
         "configs":
         {
@@ -96,7 +96,7 @@ You can create a configuration file (JSON or YAML) to set the properties as belo
     name: "amqp1_0-sink"
     inputs: 
       - "user-op-queue-topic"
-    archive: "connectors/pulsar-io-amqp1_0-{{connector:version}}.nar"
+    archive: "connectors/pulsar-io-amqp1_0-3.0.0.1-rc1.nar"
     parallelism: 1
     
     configs:
@@ -120,7 +120,7 @@ kind: Sink
 metadata:
   name: amqp-sink-sample
 spec:
-  image: streamnative/pulsar-io-amqp-1-0:{{connector:version}}
+  image: streamnative/pulsar-io-amqp-1-0:3.0.0.1-rc1
   className: org.apache.pulsar.ecosystem.io.amqp.AmqpSink
   replicas: 1
   input:
@@ -146,7 +146,7 @@ spec:
     cpu: "0.1"
     memory: 1G
   java:
-    jar: connectors/pulsar-io-amqp1_0-{{connector:version}}.nar
+    jar: connectors/pulsar-io-amqp1_0-3.0.0.1-rc1.nar
   clusterName: test-pulsar
   autoAck: true
 ```
@@ -168,7 +168,7 @@ This example shows how to create an AMQP1_0 sink connector on a Pulsar cluster u
 ```
 PULSAR_HOME/bin/pulsar-admin sinks create \
 --name amqp1_0-sink \
---archive pulsar-io-amqp1_0-{{connector:version}}.nar \
+--archive pulsar-io-amqp1_0-3.0.0.1-rc1.nar \
 --classname org.apache.pulsar.ecosystem.io.amqp.AmqpSink \
 --sink-config-file amqp-sink-config.yaml
 ```
@@ -190,7 +190,7 @@ This example describes how to use the AMQP1_0 sink connector to pull data from P
 2. Copy the NAR package of the AMQP1_0 sink connector to the Pulsar connectors directory.
 
     ```
-    cp pulsar-io-amqp1_0-{{connector:version}}.nar $PULSAR_HOME/connectors/pulsar-io-amqp1_0-{{connector:version}}.nar
+    cp pulsar-io-amqp1_0-3.0.0.1-rc1.nar $PULSAR_HOME/connectors/pulsar-io-amqp1_0-3.0.0.1-rc1.nar
     ```
 
 3. Start Pulsar in standalone mode.
@@ -207,7 +207,7 @@ This example describes how to use the AMQP1_0 sink connector to pull data from P
 
     ```
     Searching for connectors in /Volumes/other/apache-pulsar-2.8.0-SNAPSHOT/./connectors
-    Found connector ConnectorDefinition(name=amqp1_0, description=AMQP1_0 source and AMQP1_0 connector, sourceClass=org.apache.pulsar.ecosystem.io.amqp.AmqpSource, sinkClass=org.apache.pulsar.ecosystem.io.amqp.AmqpSink, sourceConfigClass=null, sinkConfigClass=null) from /Volumes/other/apache-pulsar-2.8.0-SNAPSHOT/./connectors/pulsar-io-amqp1_0-{{connector:version}}.nar
+    Found connector ConnectorDefinition(name=amqp1_0, description=AMQP1_0 source and AMQP1_0 connector, sourceClass=org.apache.pulsar.ecosystem.io.amqp.AmqpSource, sinkClass=org.apache.pulsar.ecosystem.io.amqp.AmqpSink, sourceConfigClass=null, sinkConfigClass=null) from /Volumes/other/apache-pulsar-2.8.0-SNAPSHOT/./connectors/pulsar-io-amqp1_0-3.0.0.1-rc1.nar
     Searching for functions in /Volumes/other/apache-pulsar-2.8.0-SNAPSHOT/./functions
     ```
 
@@ -363,7 +363,7 @@ This example explains how to create an AMQP1_0 sink connector on an on-premises 
 1. Copy the NAR package of the AMQP1_0 connector to the Pulsar connectors directory.
 
     ```
-    cp pulsar-io-amqp1_0-{{connector:version}}.nar $PULSAR_HOME/connectors/pulsar-io-amqp1_0-{{connector:version}}.nar
+    cp pulsar-io-amqp1_0-3.0.0.1-rc1.nar $PULSAR_HOME/connectors/pulsar-io-amqp1_0-3.0.0.1-rc1.nar
     ```
 
 2. Reload all [built-in connectors](https://pulsar.apache.org/docs/en/next/io-connectors/).
@@ -413,7 +413,7 @@ This example demonstrates how to create an AMQP1_0 sink connector through Functi
     metadata:
     name: amqp-sink-sample
     spec:
-    image: streamnative/pulsar-io-amqp-1-0:{{connector:version}}
+    image: streamnative/pulsar-io-amqp-1-0:3.0.0.1-rc1
     className: org.apache.pulsar.ecosystem.io.amqp.AmqpSink
     replicas: 1
     input:
@@ -439,7 +439,7 @@ This example demonstrates how to create an AMQP1_0 sink connector through Functi
         cpu: "0.1"
         memory: 1G
     java:
-        jar: connectors/pulsar-io-amqp1_0-{{connector:version}}.nar
+        jar: connectors/pulsar-io-amqp1_0-3.0.0.1-rc1.nar
     clusterName: test-pulsar
     autoAck: true
     ```
