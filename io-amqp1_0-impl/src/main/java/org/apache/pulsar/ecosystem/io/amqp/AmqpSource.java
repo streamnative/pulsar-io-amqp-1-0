@@ -93,11 +93,11 @@ public class AmqpSource extends PushSource<ByteBuffer> {
                     record = new QpidJmsRecord(
                             Optional.empty(),
                             ByteBuffer.wrap(((JmsTextMessage) message).getText().getBytes(StandardCharsets.UTF_8)),
-                            message);
+                            (JmsMessage) message);
                 } else {
                     ByteBuf byteBuf = AmqpCodec.encodeMessage(
                             (AmqpJmsMessageFacade) ((JmsMessage) message).getFacade());
-                    record = new QpidJmsRecord(Optional.empty(), byteBuf.nioBuffer(), message);
+                    record = new QpidJmsRecord(Optional.empty(), byteBuf.nioBuffer(), (JmsMessage) message);
                 }
                 pushSource.consume(record);
             } catch (Exception e) {
@@ -114,7 +114,7 @@ public class AmqpSource extends PushSource<ByteBuffer> {
     private static class QpidJmsRecord implements Record<ByteBuffer> {
         private final Optional<String> key;
         private final ByteBuffer value;
-        private final Message jmsMessage;
+        private final JmsMessage jmsMessage;
 
         @Override
         public Schema<ByteBuffer> getSchema() {
@@ -133,12 +133,9 @@ public class AmqpSource extends PushSource<ByteBuffer> {
         @Override
         public void fail() {
             try {
-                if (jmsMessage instanceof JmsMessage) {
-                    JmsMessage qpidJmsMessage = (JmsMessage) jmsMessage;
-                    if (qpidJmsMessage.getAcknowledgeCallback() != null) {
-                        qpidJmsMessage.getAcknowledgeCallback().setAckType(JmsMessageSupport.REJECTED);
-                        qpidJmsMessage.acknowledge();
-                    }
+                if (jmsMessage.getAcknowledgeCallback() != null) {
+                    jmsMessage.getAcknowledgeCallback().setAckType(JmsMessageSupport.REJECTED);
+                    jmsMessage.acknowledge();
                 }
             } catch (JMSException e) {
                 log.error("Failed to reject qpid jms message.", e);
