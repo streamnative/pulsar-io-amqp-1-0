@@ -89,15 +89,15 @@ public class AmqpSource extends PushSource<ByteBuffer> {
         public void onMessage(Message message) {
             try {
                 QpidJmsRecord record;
+                JmsMessage jmsMessage = (JmsMessage) message;
                 if (config.isOnlyTextMessage()) {
-                    record = new QpidJmsRecord(
-                            Optional.empty(),
-                            ByteBuffer.wrap(((JmsTextMessage) message).getText().getBytes(StandardCharsets.UTF_8)),
-                            (JmsMessage) message);
+                    ByteBuffer byteBuffer = ByteBuffer.wrap(
+                            ((JmsTextMessage) jmsMessage).getText().getBytes(StandardCharsets.UTF_8));
+                    record = new QpidJmsRecord(Optional.empty(), byteBuffer, jmsMessage);
                 } else {
                     ByteBuf byteBuf = AmqpCodec.encodeMessage(
-                            (AmqpJmsMessageFacade) ((JmsMessage) message).getFacade());
-                    record = new QpidJmsRecord(Optional.empty(), byteBuf.nioBuffer(), (JmsMessage) message);
+                            (AmqpJmsMessageFacade) jmsMessage.getFacade());
+                    record = new QpidJmsRecord(Optional.empty(), byteBuf.nioBuffer(), jmsMessage);
                 }
                 pushSource.consume(record);
             } catch (Exception e) {

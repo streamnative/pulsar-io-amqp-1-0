@@ -31,3 +31,4 @@ configs:
     username: "guest"
     password: "guest"
     queue: "user-op-queue"
+    sessionMode: 2
