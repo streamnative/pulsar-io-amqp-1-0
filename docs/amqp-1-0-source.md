@@ -83,8 +83,7 @@ You can create a configuration file (JSON or YAML) to set the properties as belo
             "port": "5672",
             "username": "guest",
             "password": "guest",
-            "queue": "user-op-queue",
-            "sessionMode": 2
+            "queue": "user-op-queue"
         }
     }
     ```
@@ -106,7 +105,6 @@ You can create a configuration file (JSON or YAML) to set the properties as belo
             username: "guest"
             password: "guest"
             queue: "user-op-queue"
-            sessionMode: 2
     ```
 
 ## Configure it with Function Mesh
@@ -134,7 +132,6 @@ spec:
     username: "guest"
     password: "guest"
     queue: "user-op-queue"
-    sessionMode: 2
   pulsar:
     pulsarConfig: "test-pulsar-source-config"
   resources:
@@ -417,7 +414,6 @@ This example demonstrates how to create an AMQP1_0 source connector through Func
         username: "guest"
         password: "guest"
         queue: "user-op-queue"
-        sessionMode: 2
     pulsar:
         pulsarConfig: "test-pulsar-source-config"
     resources:
