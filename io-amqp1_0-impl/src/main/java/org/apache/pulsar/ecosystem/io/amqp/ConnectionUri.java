@@ -18,7 +18,10 @@
  */
 package org.apache.pulsar.ecosystem.io.amqp;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -34,6 +37,11 @@ public class ConnectionUri {
     private int port;
     private List<String> urlOptions;
 
+    public static ConnectionUri load(Map<String, Object> config) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.readValue(objectMapper.writeValueAsBytes(config), ConnectionUri.class);
+    }
+
     public void validate() throws ConfigurationInvalidException {
         if (StringUtils.isEmpty(this.protocol)
                 || StringUtils.isEmpty(this.host)
@@ -48,10 +56,9 @@ public class ConnectionUri {
     }
 
     private String getUrlOptionsAsString() {
-        String urlOptionsAsString = "";
         if (urlOptions != null && !urlOptions.isEmpty()){
             return "?" + String.join("&", urlOptions);
         }
-        return urlOptionsAsString;
+        return "";
     }
 }

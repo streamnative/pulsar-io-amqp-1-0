@@ -39,10 +39,19 @@ public class AmqpBaseConfig {
     private String username;
     private String password;
     @Deprecated
+    /* Use Connection with failover support instead
+     For single uri configuration without failover support provide a list with one ConnectionUri in Connection
+    */
     private String host;
     @Deprecated
+    /* Use Connection with failover support instead
+     For single uri configuration without failover support provide a list with one ConnectionUri in Connection
+    */
     private String protocol;
     @Deprecated
+    /* Use Connection with failover support instead
+      For single uri configuration without failover support provide a list with one ConnectionUri in Connection
+     */
     private int port;
     private String queue;
     private String topic;
@@ -57,7 +66,7 @@ public class AmqpBaseConfig {
     public void validate() throws ConfigurationInvalidException {
 
         if (connection != null) {
-            if (isValidUrlComponentConfiguration()){
+            if (isValidProtocolConfiguration() || isValidHostConfiguration() || isValidPortConfiguration()){
                 throw new ConfigurationInvalidException(
                         "When connection is set, protocol, host, port should be empty.");
             }
@@ -101,11 +110,24 @@ public class AmqpBaseConfig {
         return destination;
     }
 
-
     private boolean isValidUrlComponentConfiguration() {
-        return StringUtils.isNotEmpty(protocol)
-                && StringUtils.isNotEmpty(host)
-                && port > 0;
+        return isValidProtocolConfiguration()
+                && isValidHostConfiguration()
+                && isValidPortConfiguration();
     }
+
+    private boolean isValidProtocolConfiguration() {
+        return StringUtils.isNotEmpty(protocol);
+    }
+
+    private boolean isValidHostConfiguration() {
+        return StringUtils.isNotEmpty(host);
+    }
+
+    private boolean isValidPortConfiguration() {
+        return port > 0;
+    }
+
+
 
 }

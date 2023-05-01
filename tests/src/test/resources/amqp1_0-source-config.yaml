@@ -26,7 +26,11 @@ parallelism: 1
 
 configs:
     connection:
-      useFailover: true
+      failover:
+        useFailover: true
+        jmsClientId: "amqp-source"
+        failoverConfigurationOptions:
+          - "failover.maxReconnectAttempts=-1"
       uris:
         - protocol: "amqp"
           host: "solace"

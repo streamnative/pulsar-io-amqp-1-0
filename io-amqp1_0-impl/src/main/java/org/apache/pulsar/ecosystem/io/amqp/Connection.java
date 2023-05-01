@@ -18,45 +18,61 @@
  */
 package org.apache.pulsar.ecosystem.io.amqp;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
 import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
- * Connection with a list of URI's and whether the failover prefix should be used.
+ * Connection with a list of URI's and whether the failover configuration.
  */
 @Data
 @Accessors(chain = true)
 public class Connection {
 
-    private boolean useFailover;
+    private Failover failover;
     private List<ConnectionUri> uris;
 
-    public String getUri(){
-        String urisString = this.uris
+    public static Connection load(Map<String, Object> config) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.readValue(objectMapper.writeValueAsBytes(config), Connection.class);
+    }
+
+    public String getUri() {
+        String prefix = failover != null ? failover.getFailoverPrefix() : "";
+        String suffix = failover != null ? failover.getFailoverSuffix() : "";
+
+        return this.uris
                 .stream()
                 .map(ConnectionUri::getUri)
-                .collect(Collectors.joining(","));
-        return useFailover ? "failover:(" + urisString + ")" : urisString;
+                .collect(Collectors.joining(",", prefix, suffix));
     }
 
     public void validate() throws ConfigurationInvalidException {
 
-        if (null == uris || uris.isEmpty()){
+        if (null == uris || uris.isEmpty()) {
             throw new ConfigurationInvalidException("No uri's specified in connection");
         }
 
-        if (uris.size() > 1 && !useFailover) {
-            throw new ConfigurationInvalidException("Multiple uri's currently only supported when useFailover is "
-                    + "set to true");
+        if (uris.size() > 1 && (failover == null || !failover.isUseFailover())){
+            throw new ConfigurationInvalidException("Multiple uri's currently only supported when failover is "
+                    + "configured with useFailover set to true");
         }
 
-        for (ConnectionUri host : uris) {
-            if (host == null){
-                throw new ConfigurationInvalidException("Host cannot be null in connection");
+        if (failover != null) {
+            failover.validate();
+        }
+
+        for (ConnectionUri connectionUri : uris) {
+            if (connectionUri == null) {
+                throw new ConfigurationInvalidException("uris in Connection should contain a valid "
+                        + "combination of protocol, host and port");
             }
-            host.validate();
+            connectionUri.validate();
         }
     }
 }

@@ -20,6 +20,7 @@ package org.apache.pulsar.ecosystem.io.amqp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,8 +54,10 @@ public class AmqpBaseConfigTest {
         ArrayList<Map<String, Object>> uris = new ArrayList<>();
         uris.add(getConnectionUriConfig("localhost", 5672, "amqp",
                 Arrays.asList("transport.tcpKeepAlive=true")));
+        Map<String, Object> failover = getFailoverConfig(false, "",
+                Collections.emptyList());
 
-        Map<String, Object> paramsMap = getBaseConfigConnection(false, uris);
+        Map<String, Object> paramsMap = getBaseConfigConnection(uris, failover);
         paramsMap.put("queue", "test-queue");
         AmqpBaseConfig baseConfig = AmqpBaseConfig.load(paramsMap);
         baseConfig.validate();
@@ -64,92 +67,6 @@ public class AmqpBaseConfigTest {
         Assert.assertEquals(5672, baseConfig.getConnection().getUris().get(0).getPort());
         Assert.assertEquals("test-queue", baseConfig.getQueue());
         Assert.assertEquals("amqp://localhost:5672?transport.tcpKeepAlive=true", baseConfig.getUri());
-    }
-
-    @Test
-    public void validateTestConflictMultipleurisAndNoFailover() throws Exception {
-        Map<String, Object> uri1 =
-                getConnectionUriConfig("localhost", 5672, "amqp",
-                        Arrays.asList("transport.tcpKeepAlive=true"));
-        Map<String, Object> uri2 =
-                getConnectionUriConfig("localhost", 5672, "amqp",
-                        Arrays.asList("transport.tcpKeepAlive=true"));
-
-        ArrayList<Map<String, Object>> uris = new ArrayList<>();
-        uris.add(uri1);
-        uris.add(uri2);
-
-        Map<String, Object> paramsMap = getBaseConfigConnection(false, uris);
-        paramsMap.put("queue", "test-queue");
-        AmqpBaseConfig baseConfig = AmqpBaseConfig.load(paramsMap);
-
-        try {
-            baseConfig.validate();
-            Assert.fail("The test should fail because multiple uris on connection is currently only "
-                    + "supported when useFailover is true");
-        } catch (Exception e) {
-            Assert.assertTrue(e instanceof ConfigurationInvalidException);
-            Assert.assertEquals("Multiple uri's currently only supported when useFailover is set to true",
-                    e.getMessage());
-        }
-    }
-
-    @Test
-    public void validateTestEmptyuris() throws Exception {
-
-        ArrayList<Map<String, Object>> uris = new ArrayList<>();
-
-        Map<String, Object> paramsMap = getBaseConfigConnection(false, uris);
-        paramsMap.put("queue", "test-queue");
-        AmqpBaseConfig baseConfig = AmqpBaseConfig.load(paramsMap);
-
-        try {
-            baseConfig.validate();
-            Assert.fail("The test should fail because uris is empty in connection");
-        } catch (Exception e) {
-            Assert.assertTrue(e instanceof ConfigurationInvalidException);
-            Assert.assertEquals("No uri's specified in connection", e.getMessage());
-        }
-    }
-
-    @Test
-    public void validateTestNullHost() throws Exception {
-
-        ArrayList<Map<String, Object>> uris = new ArrayList<>();
-        uris.add(null);
-
-        Map<String, Object> paramsMap = getBaseConfigConnection(false, uris);
-        paramsMap.put("queue", "test-queue");
-        AmqpBaseConfig baseConfig = AmqpBaseConfig.load(paramsMap);
-
-        try {
-            baseConfig.validate();
-            Assert.fail("The test should fail because no connection contains uris with null value");
-        } catch (Exception e) {
-            Assert.assertTrue(e instanceof ConfigurationInvalidException);
-            Assert.assertEquals("Host cannot be null in connection", e.getMessage());
-        }
-    }
-
-    @Test
-    public void validateTestIncompleteHost() throws Exception {
-
-        ArrayList<Map<String, Object>> uris = new ArrayList<>();
-        uris.add(getConnectionUriConfig(null, 5672, "amqp",
-                Arrays.asList("transport.tcpKeepAlive=true")));
-
-        Map<String, Object> paramsMap = getBaseConfigConnection(false, uris);
-        paramsMap.put("queue", "test-queue");
-        AmqpBaseConfig baseConfig = AmqpBaseConfig.load(paramsMap);
-
-        try {
-            baseConfig.validate();
-            Assert.fail("The test should fail because connection are incomplete");
-        } catch (Exception e) {
-            Assert.assertTrue(e instanceof ConfigurationInvalidException);
-            Assert.assertEquals("Protocol, host and port should be set for "
-                    + "all uris in connection", e.getMessage());
-        }
     }
 
     @Test
@@ -167,7 +84,10 @@ public class AmqpBaseConfigTest {
         uris.add(getConnectionUriConfig("localhost", 5672, "amqp",
                 Arrays.asList("transport.tcpKeepAlive=true")));
 
-        Map<String, Object> paramsMap = getBaseConfigConnection(false, uris);
+        Map<String, Object> failover = getFailoverConfig(false, "",
+                Collections.emptyList());
+
+        Map<String, Object> paramsMap = getBaseConfigConnection(uris, failover);
         paramsMap.put("queue", "test-queue");
         AmqpBaseConfig baseConfig = AmqpSourceConfig.load(paramsMap);
         baseConfig.validate();
@@ -175,17 +95,69 @@ public class AmqpBaseConfigTest {
     }
 
     @Test
-    public void validateTestUriBasedOnConnectionWithMultipleUrlOptions() throws Exception {
+    public void validateTestUriBasedOnConnectionFailOnEmptyHost() throws Exception {
         ArrayList<Map<String, Object>> uris = new ArrayList<>();
-        uris.add(getConnectionUriConfig("localhost", 5672, "amqp",
-                Arrays.asList("transport.tcpKeepAlive=true", "extra_property=false")));
+        uris.add(getConnectionUriConfig("", 5672, "amqp",
+                Arrays.asList("transport.tcpKeepAlive=true")));
 
-        Map<String, Object> paramsMap = getBaseConfigConnection(false, uris);
+        Map<String, Object> failover = getFailoverConfig(false, "",
+                Collections.emptyList());
+
+        Map<String, Object> paramsMap = getBaseConfigConnection(uris, failover);
         paramsMap.put("queue", "test-queue");
         AmqpBaseConfig baseConfig = AmqpSourceConfig.load(paramsMap);
-        baseConfig.validate();
-        Assert.assertEquals("amqp://localhost:5672?transport.tcpKeepAlive=true&extra_property=false",
-                baseConfig.getUri());
+        try {
+            baseConfig.validate();
+            Assert.fail("The test should fail because connection contains uris with null value");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof ConfigurationInvalidException);
+            Assert.assertEquals("Protocol, host and port should be set for all uris in connection",
+                    e.getMessage());
+        }
+    }
+
+    @Test
+    public void validateTestUriBasedOnConnectionFailOnEmptyProtocol() throws Exception {
+        ArrayList<Map<String, Object>> uris = new ArrayList<>();
+        uris.add(getConnectionUriConfig("localhost", 5672, "",
+                Arrays.asList("transport.tcpKeepAlive=true")));
+
+        Map<String, Object> failover = getFailoverConfig(false, "",
+                Collections.emptyList());
+
+        Map<String, Object> paramsMap = getBaseConfigConnection(uris, failover);
+        paramsMap.put("queue", "test-queue");
+        AmqpBaseConfig baseConfig = AmqpSourceConfig.load(paramsMap);
+        try {
+            baseConfig.validate();
+            Assert.fail("The test should fail because connection contains uris with null value");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof ConfigurationInvalidException);
+            Assert.assertEquals("Protocol, host and port should be set for all uris in connection",
+                    e.getMessage());
+        }
+    }
+
+    @Test
+    public void validateTestUriBasedOnConnectionFailOnInvalidPort() throws Exception {
+        ArrayList<Map<String, Object>> uris = new ArrayList<>();
+        uris.add(getConnectionUriConfig("localhost", 0, "amqp",
+                Arrays.asList("transport.tcpKeepAlive=true")));
+
+        Map<String, Object> failover = getFailoverConfig(false, "",
+                Collections.emptyList());
+
+        Map<String, Object> paramsMap = getBaseConfigConnection(uris, failover);
+        paramsMap.put("queue", "test-queue");
+        AmqpBaseConfig baseConfig = AmqpSourceConfig.load(paramsMap);
+        try {
+            baseConfig.validate();
+            Assert.fail("The test should fail because connection contains uris with null value");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof ConfigurationInvalidException);
+            Assert.assertEquals("Protocol, host and port should be set for all uris in connection",
+                    e.getMessage());
+        }
     }
 
     @Test
@@ -200,13 +172,62 @@ public class AmqpBaseConfigTest {
         ArrayList<Map<String, Object>> uris = new ArrayList<>();
         uris.add(uri1);
         uris.add(uri2);
+        Map<String, Object> failover = getFailoverConfig(true, "foo",
+                Arrays.asList("failover.maxReconnectAttempts=20"));
 
-        Map<String, Object> paramsMap = getBaseConfigConnection(true, uris);
+        Map<String, Object> paramsMap = getBaseConfigConnection(uris, failover);
         paramsMap.put("queue", "test-queue");
         AmqpBaseConfig baseConfig = AmqpSourceConfig.load(paramsMap);
         baseConfig.validate();
         Assert.assertEquals("failover:(amqp://localhost:5672?transport.tcpKeepAlive=true,"
-                + "amqp://localhost:5672?transport.tcpKeepAlive=true)", baseConfig.getUri());
+                + "amqp://localhost:5672?transport.tcpKeepAlive=true)?jms.clientID=foo&failover.maxReconnectAttempts=20"
+                , baseConfig.getUri());
+    }
+
+    @Test
+    public void validateTestUriBasedOnConnectionFailOnFailoverOptionsButNoJmsClientId() throws Exception {
+        ArrayList<Map<String, Object>> uris = new ArrayList<>();
+        uris.add(getConnectionUriConfig("localhost", 5672, "",
+                Arrays.asList("transport.tcpKeepAlive=true")));
+
+        Map<String, Object> failover = getFailoverConfig(true, "",
+                Arrays.asList("failover.maxReconnectAttempts=20"));
+
+        Map<String, Object> paramsMap = getBaseConfigConnection(uris, failover);
+        paramsMap.put("queue", "test-queue");
+        AmqpBaseConfig baseConfig = AmqpSourceConfig.load(paramsMap);
+        try {
+            baseConfig.validate();
+            Assert.fail("The test should fail because jmsClientId should be provided when "
+                    + "failoverConfigurationOptions are provided");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof ConfigurationInvalidException);
+            Assert.assertEquals("failoverConfigurationOptions is only supported when failover is configured with "
+                            + "useFailover set to true and jmsClientId provided", e.getMessage());
+        }
+    }
+
+    @Test
+    public void validateTestUriBasedOnConnectionFailOnJmsClientIdButNoFailoverOptions() throws Exception {
+        ArrayList<Map<String, Object>> uris = new ArrayList<>();
+        uris.add(getConnectionUriConfig("localhost", 5672, "",
+                Arrays.asList("transport.tcpKeepAlive=true")));
+
+        Map<String, Object> failover = getFailoverConfig(true, "foo",
+                Collections.emptyList());
+
+        Map<String, Object> paramsMap = getBaseConfigConnection(uris, failover);
+        paramsMap.put("queue", "test-queue");
+        AmqpBaseConfig baseConfig = AmqpSourceConfig.load(paramsMap);
+        try {
+            baseConfig.validate();
+            Assert.fail("The test should fail because failoverConfigurationOptions should be provided when "
+                    + "jmsClientId are provided");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof ConfigurationInvalidException);
+            Assert.assertEquals("jmsClientId is only supported when failover is configured with "
+                    + "useFailover set to true and failoverConfigurationOptions provided", e.getMessage());
+        }
     }
 
 
@@ -218,12 +239,15 @@ public class AmqpBaseConfigTest {
         uris.add(getConnectionUriConfig("localhost", 5672, "amqp",
                 Arrays.asList("transport.tcpKeepAlive=true")));
 
-        paramsMap.putAll(getBaseConfigConnection(false, uris));
+        Map<String, Object> failover = getFailoverConfig(false, "",
+                Collections.emptyList());
+
+        paramsMap.putAll(getBaseConfigConnection(uris, failover));
         paramsMap.put("queue", "test-queue");
         AmqpBaseConfig sourceConfig = AmqpSourceConfig.load(paramsMap);
         try {
             sourceConfig.validate();
-            Assert.fail("The test should fail because connectiondetails is set at the same time as "
+            Assert.fail("The test should fail because connection is set at the same time as "
                     + "protocol, host, port and/or urlOptions");
         } catch (Exception e) {
             Assert.assertTrue(e instanceof ConfigurationInvalidException);
@@ -233,7 +257,7 @@ public class AmqpBaseConfigTest {
     }
 
     @Test
-    public void invalidConfigNoRawUrlProtocolHostAndPort() throws Exception {
+    public void invalidConfigNoConnectionOrProtocolHostAndPortSet() throws Exception {
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("queue", "test-queue");
         AmqpBaseConfig sourceConfig = AmqpSourceConfig.load(paramsMap);
@@ -296,13 +320,13 @@ public class AmqpBaseConfigTest {
         return paramsMap;
     }
 
-    private Map<String, Object> getBaseConfigConnection(boolean useFailover,
-                                                               ArrayList<Map<String, Object>> uris) {
+    private Map<String, Object> getBaseConfigConnection(ArrayList<Map<String, Object>> uris,
+                                                        Map<String, Object> failover) {
         Map<String, Object> paramsMap = new HashMap<>();
         Map<String, Object> connectionMap = new HashMap<>();
 
-        connectionMap.put("useFailover", useFailover);
         connectionMap.put("uris", uris);
+        connectionMap.put("failover", failover);
 
         paramsMap.put("connection", connectionMap);
         return paramsMap;
@@ -316,5 +340,14 @@ public class AmqpBaseConfigTest {
         hostMap.put("port", port);
         hostMap.put("urlOptions", urlOptions);
         return hostMap;
+    }
+
+    private Map<String, Object> getFailoverConfig(boolean useFailover, String jmsClientId,
+                                                  List<String> failoverConfigurationOptions) {
+        Map<String, Object> failoverMap = new HashMap<>();
+        failoverMap.put("useFailover", useFailover);
+        failoverMap.put("jmsClientId", jmsClientId);
+        failoverMap.put("failoverConfigurationOptions", failoverConfigurationOptions);
+        return failoverMap;
     }
 }

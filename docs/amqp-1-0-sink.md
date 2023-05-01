@@ -64,10 +64,18 @@ You can create a configuration file (JSON or YAML) to set the following properti
 
 A Connection object can be specified as follows:
 
-| Name | Type|Required | Default | Description 
-|------|----------|----------|---------|-------------|
-| `useFailover` |boolean| true | false | If it is set to true, the connection will be created from the uris provided under uris, using qpid's failover connection factory. |
-| `uris` | list of ConnectionUri| true | " " (empty string) | A list of ConnectionUri objects. When useFailover is set to true 1 or more should be provided. Currently only 1 uri is supported when useFailover is set to false|
+| Name       | Type                  | Required | Default | Description                                                                                                                                                       
+|------------|-----------------------|----------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `failover` | Failover              | false    | " " (empty string) | The configuration for a failover connection.                                                                                                                      |
+| `uris`     | list of ConnectionUri | true     | " " (empty string) | A list of ConnectionUri objects. When useFailover is set to true 1 or more should be provided. Currently only 1 uri is supported when useFailover is set to false |
+
+A Failover object can be specified as follows:
+
+| Name                           | Type    | Required                                         | Default | Description                                                                                                                                                                                                                                                     
+|--------------------------------|---------|--------------------------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `useFailover`                  | boolean | true                                             | false | If it is set to true, the connection will be created from the uris provided under uris, using qpid's failover connection factory.                                                                                                                               |
+| `jmsClientId`                  | String  | required if failoverConfigurationOptions is used | " " (empty string) | Identifying name for the jms Client                                                                                                                                                                                                                             |
+| `failoverConfigurationOptions` | List of String | required if jmsClientId is used | " " (empty string) | A list of options (e.g. <key=value>). The options wil be joined using an '&', prefixed with a the jmsClientId and added to the end of the failoverUri. see also: https://qpid.apache.org/releases/qpid-jms-2.2.0/docs/index.html#failover-configuration-options |
 
 A ConnectionUri object can be specified as follows:
 | Name | Type|Required | Default | Description 
@@ -106,7 +114,8 @@ You can create a configuration file (JSON or YAML) to set the properties as belo
             "queue": "user-op-queue-pulsar"
         }
     }
-    
+    ```
+
 Or:
     
     ```json
@@ -117,10 +126,11 @@ Or:
         "inputs": ["user-op-queue-topic"],
         "archive": "connectors/pulsar-io-amqp1_0-{{connector:version}}.nar",
         "parallelism": 1,
-        "configs":
-        {
+        "configs": {
             "connection": {
-                "useFailover": true,
+                "failover": {
+                    "useFailover": true
+                },
                 "uris": [{
                         "protocol": "amqp",
                         "host": "localhost",
@@ -134,7 +144,8 @@ Or:
             "queue": "user-op-queue-pulsar"
         }
     }
-
+    ```
+    
 * YAML
 
 [deprecated]
@@ -161,28 +172,26 @@ Or:
 Or:
     
     ```yaml
-    tenant: "public"
-    namespace: "default"
-    name: "amqp1_0-sink"
-    inputs: 
-      - "user-op-queue-topic"
-    archive: "connectors/pulsar-io-amqp1_0-{{connector:version}}.nar"
+    tenant: public
+    namespace: default
+    name: amqp1_0-sink
+    inputs:
+      - user-op-queue-topic
+    archive: connectors/pulsar-io-amqp1_0-{{connector:version}}.nar
     parallelism: 1
-    
     configs:
-        connection: {
-            useFailover: true,
-            uris: [{
-                    protocol: "amqp",
-                    host: "localhost",
-                    port: 5672,
-                    urlOptions: ["transport.tcpKeepAlive=true"]
-                }
-            ]
-        }
-        username: "guest"
-        password: "guest"
-        queue: "user-op-queue-pulsar"
+      connection:
+        failover:
+          useFailover: true
+        uris:
+          - protocol: amqp
+            host: localhost
+            port: 5672
+            urlOptions:
+              - transport.tcpKeepAlive=true
+      username: guest
+      password: guest
+      queue: user-op-queue-pulsar
     ```
 
 ## Configure it with Function Mesh
@@ -248,16 +257,15 @@ spec:
     customSchemaSources:
       “persistent://public/default/user-op-queue-topic”: “org.apache.pulsar.client.impl.schema.ByteBufferSchema”
   sinkConfig:
-    connection: {
-        useFailover: true,
-        uris: [{
-                protocol: "amqp",
-                host: "localhost",
-                port: 5672,
-                urlOptions: ["transport.tcpKeepAlive=true"]
-            }
-        ]
-    }
+    connection:
+      failover:
+        useFailover: true
+      uris:
+        - protocol: amqp
+          host: localhost
+          port: 5672
+          urlOptions:
+            - transport.tcpKeepAlive=true
     username: "guest"
     password: "guest"
     queue: "user-op-queue-pulsar"
@@ -585,16 +593,15 @@ This example demonstrates how to create an AMQP1_0 sink connector through Functi
         customSchemaSources:
         “persistent://public/default/user-op-queue-topic”: “org.apache.pulsar.client.impl.schema.ByteBufferSchema”
     sinkConfig:
-        connection: {
-            useFailover: true,
-            uris: [{
-                    protocol: "amqp",
-                    host: "localhost",
-                    port: 5672,
-                    urlOptions: ["transport.tcpKeepAlive=true"]
-                }
-            ]
-        }
+        connection:
+          failover:
+            useFailover: true
+          uris:
+            - protocol: amqp
+              host: localhost
+              port: 5672
+              urlOptions:
+                - transport.tcpKeepAlive=true
         username: "guest"
         password: "guest"
         queue: "user-op-queue-pulsar"

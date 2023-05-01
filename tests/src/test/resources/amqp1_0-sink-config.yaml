@@ -27,7 +27,11 @@ parallelism: 1
 sourceSubscriptionPosition: "Earliest"
 configs:
     connection:
-      useFailover: true
+      failover:
+        useFailover: true
+        jmsClientId: "amqp-sink"
+        failoverConfigurationOptions:
+          - "failover.maxReconnectAttempts=-1"
       uris:
         - protocol: "amqp"
           host: "solace"
