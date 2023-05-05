@@ -60,6 +60,7 @@ You can create a configuration file (JSON or YAML) to set the following properti
 | `queue` | String|false | " " (empty string) | The queue name that messages should be read from or written to. |
 | `topic` | String|false | " " (empty string) | The topic name that messages should be read from or written to. |
 | `onlyTextMessage` | boolean | false | false | If it is set to `true`, the AMQP message type must be set to `TextMessage`. Pulsar consumers can consume the messages with schema ByteBuffer. |
+| `sessionMode`     | int     | false    | 1 (AUTO_ACKNOWLEDGE) | Sets the sessionMode of the jmsContext in the AmqpSource, see [JMSContext](https://docs.oracle.com/javaee/7/api/javax/jms/JMSContext.html) for other options (AUTO_ACKNOWLEDGE (1), CLIENT_ACKNOWLEDGE (2), DUPS_OK_ACKNOWLEDGE (3), SESSION_TRANSACTED (4)) |
 
 A Connection object can be specified as follows:
 

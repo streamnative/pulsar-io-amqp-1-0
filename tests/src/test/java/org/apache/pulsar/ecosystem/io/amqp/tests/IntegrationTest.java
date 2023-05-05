@@ -59,7 +59,16 @@ public class IntegrationTest {
     private final AtomicBoolean testSuccess = new AtomicBoolean(false);
 
     @Test(timeout = 1000 * 60 * 5)
-    public void test() throws Exception {
+    public void testDefaultSessionMode() throws Exception {
+        test("amqp1_0-source-config.yaml");
+    }
+
+    @Test(timeout = 1000 * 60 * 5)
+    public void testClientAcknowledgeSessionMode() throws Exception {
+        test("amqp1_0-source-config-session-mode.yaml");
+    }
+
+    private void test(String sourceConfigYaml) throws Exception {
         log.info("Start integration test for amqp-1-0 connector.");
         Network network = Network.newNetwork();
 
@@ -74,7 +83,7 @@ public class IntegrationTest {
         standaloneContainer.withClasspathResourceMapping(
                 "pulsar-io-amqp1_0.nar", "/pulsar/connectors/pulsar-io-amqp1_0.nar", BindMode.READ_ONLY);
         standaloneContainer.withClasspathResourceMapping(
-                "amqp1_0-source-config.yaml", "/pulsar/amqp1_0-source-config.yaml", BindMode.READ_ONLY);
+                sourceConfigYaml, "/pulsar/" + sourceConfigYaml, BindMode.READ_ONLY);
         standaloneContainer.withClasspathResourceMapping(
                 "amqp1_0-sink-config.yaml", "/pulsar/amqp1_0-sink-config.yaml", BindMode.READ_ONLY);
 
@@ -95,7 +104,7 @@ public class IntegrationTest {
 
         Container.ExecResult execResult = standaloneContainer.execInContainer(
                 "/pulsar/bin/pulsar-admin",
-                "sources", "create", "--source-config-file", "/pulsar/amqp1_0-source-config.yaml");
+                "sources", "create", "--source-config-file", "/pulsar/" + sourceConfigYaml);
         Assert.assertTrue(execResult.getStdout().trim().contains("Created successfully"));
         waitForConnectorRunning(standaloneContainer, true, "amqp1_0-source");
         log.info("amqp1_0 source is running");

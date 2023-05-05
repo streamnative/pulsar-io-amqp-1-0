@@ -18,32 +18,13 @@
  */
 package org.apache.pulsar.ecosystem.io.amqp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.util.Map;
-import javax.jms.JMSContext;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.experimental.Accessors;
-
-
 /**
- * QpidJms source config.
+ * Any exception in the onMessage processing.
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-@Accessors(chain = true)
-public class AmqpSourceConfig extends AmqpBaseConfig {
+public class CouldNotProcessMessageException extends RuntimeException {
 
-    // Default session mode
-    private int sessionMode = JMSContext.AUTO_ACKNOWLEDGE;
-
-    public static AmqpSourceConfig load(Map<String, Object> config) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.readValue(objectMapper.writeValueAsBytes(config), AmqpSourceConfig.class);
+    public CouldNotProcessMessageException(Throwable e) {
+        super(e);
     }
 
-    public int getSessionMode() {
-        return sessionMode;
-    }
 }
