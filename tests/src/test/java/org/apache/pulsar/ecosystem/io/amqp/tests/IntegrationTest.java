@@ -136,6 +136,10 @@ public class IntegrationTest {
                 .atMost(30, TimeUnit.SECONDS)
                 .until(testSuccess::get);
         log.info("Finish the integration test.");
+
+        network.close();
+        standaloneContainer.close();
+        solaceContainer.close();
     }
 
     private void generateData(int count, String remoteUri) {
