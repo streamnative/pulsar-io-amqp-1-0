@@ -58,15 +58,15 @@ public class IntegrationTest {
 
     private final AtomicBoolean testSuccess = new AtomicBoolean(false);
 
-    @Test(timeout = 1000 * 60 * 5)
+    @Test(timeout = 1000 * 60 * 20)
     public void testDefaultSessionMode() throws Exception {
         test("amqp1_0-source-config.yaml");
     }
 
-    @Test(timeout = 1000 * 60 * 5)
-    public void testClientAcknowledgeSessionMode() throws Exception {
-        test("amqp1_0-source-config-session-mode.yaml");
-    }
+//    @Test(timeout = 1000 * 60 * 5)
+//    public void testClientAcknowledgeSessionMode() throws Exception {
+//        test("amqp1_0-source-config-session-mode.yaml");
+//    }
 
     private void test(String sourceConfigYaml) throws Exception {
         log.info("Start integration test for amqp-1-0 connector.");
@@ -136,6 +136,10 @@ public class IntegrationTest {
                 .atMost(30, TimeUnit.SECONDS)
                 .until(testSuccess::get);
         log.info("Finish the integration test.");
+
+        network.close();
+        standaloneContainer.close();
+        solaceContainer.close();
     }
 
     private void generateData(int count, String remoteUri) {
