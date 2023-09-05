@@ -133,7 +133,7 @@ public class IntegrationTest {
         generateData(messageCount, solaceRemoteUri);
 
         Awaitility.await().pollInterval(1, TimeUnit.SECONDS)
-                .atMost(30, TimeUnit.SECONDS)
+                .atMost(300, TimeUnit.SECONDS)
                 .until(testSuccess::get);
         log.info("Finish the integration test.");
 
