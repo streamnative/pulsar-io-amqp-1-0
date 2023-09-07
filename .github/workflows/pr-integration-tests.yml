@@ -31,7 +31,13 @@ jobs:
         df -h
 
     - name: Build with Maven skipTests
-      run: mvn clean install -DskipTests
+      run: |
+        mvn clean install -DskipTests
+
+    - name: build test image
+      run: |
+        cd tests
+        ./build.sh
 
     - name: tests module
       run: mvn test -pl tests
