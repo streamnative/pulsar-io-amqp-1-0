@@ -22,4 +22,4 @@ set -e
 IMAGE_NAME=pulsar-io-amqp-1-0:test
 PULSAR_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${pulsar.version}' --non-recursive exec:exec)
 docker build --build-arg PULSAR_IMAGE_TAG="${PULSAR_VERSION}" -t "${IMAGE_NAME}" .
-echo "build docker image ${IMAGE_NAME}"
+echo "build test image ${IMAGE_NAME} with pulsar version ${PULSAR_VERSION}"
