@@ -31,7 +31,12 @@ jobs:
         df -h
 
     - name: Build with Maven skipTests
-      run: mvn clean install -DskipTests
+      run: |
+        mvn clean install -DskipTests
+        cd tests/src/test/resources
+        readonly IMAGE_NAME=pulsar-io-amqp-1-0:test
+        readonly PULSAR_VERSION=$(cat ../PULSAR_VERSION)
+        docker build --build-arg PULSAR_IMAGE_TAG="${PULSAR_VERSION}" -t "${IMAGE_NAME}" .
 
     - name: tests module
       run: mvn test -pl tests

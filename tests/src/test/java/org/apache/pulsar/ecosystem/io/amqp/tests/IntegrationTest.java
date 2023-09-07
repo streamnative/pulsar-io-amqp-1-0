@@ -77,14 +77,6 @@ public class IntegrationTest {
                 + "&& bin/pulsar standalone";
         standaloneContainer.withExposedPorts(8080);
         standaloneContainer.withCommand("sh", "-c", command);
-
-        standaloneContainer.withClasspathResourceMapping(
-                "pulsar-io-amqp1_0.nar", "/pulsar/connectors/pulsar-io-amqp1_0.nar", BindMode.READ_ONLY);
-        standaloneContainer.withClasspathResourceMapping(
-                sourceConfigYaml, "/pulsar/" + sourceConfigYaml, BindMode.READ_ONLY);
-        standaloneContainer.withClasspathResourceMapping(
-                "amqp1_0-sink-config.yaml", "/pulsar/amqp1_0-sink-config.yaml", BindMode.READ_ONLY);
-
         standaloneContainer.start();
         log.info("standalone container start.");
 
