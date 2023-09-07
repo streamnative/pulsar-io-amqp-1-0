@@ -30,7 +30,7 @@ import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
  */
 public class SolaceContainer extends GenericContainer {
 
-    public static final String IMAGE = "solace/solace-pubsub-standard:latest";
+    public static final String IMAGE = "solace/solace-pubsub-standard:10.5";
 
     SolaceContainer(String imageName) {
         super(imageName);
