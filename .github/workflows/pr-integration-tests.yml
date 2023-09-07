@@ -33,9 +33,9 @@ jobs:
     - name: Build with Maven skipTests
       run: mvn clean install -DskipTests
     
-    - uses: actions/checkout@v2
-    - name: Setup upterm session
-      uses: lhotari/action-upterm@v1
+#    - uses: actions/checkout@v2
+#    - name: Setup upterm session
+#      uses: lhotari/action-upterm@v1
 
     - name: tests module
       run: mvn test -pl tests
