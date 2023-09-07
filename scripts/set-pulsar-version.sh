@@ -26,6 +26,5 @@ NEW_VERSION=$1
 pushd $(dirname "$0")/..
 
 mvn versions:set-property -Dproperty=pulsar.version -DnewVersion=$NEW_VERSION
-echo ${NEW_VERSION} > PULSAR_VERSION
 
 popd

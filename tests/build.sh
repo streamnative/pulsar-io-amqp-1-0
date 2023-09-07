@@ -17,10 +17,7 @@
 # under the License.
 #
 
-ARG PULSAR_IMAGE_TAG
-FROM streamnative/pulsar:${PULSAR_IMAGE_TAG}
-
-### Add connector
-COPY ./pulsar-io-amqp1_0.nar /pulsar/connectors/pulsar-io-amqp1_0.nar
-COPY ./amqp1_0-source-config.yaml /pulsar/amqp1_0-source-config.yaml
-COPY ./amqp1_0-sink-config.yaml /pulsar/amqp1_0-sink-config.yaml
+IMAGE_NAME=pulsar-io-amqp-1-0:test
+PULSAR_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${pulsar.version}' --non-recursive exec:exec)
+docker build --build-arg PULSAR_IMAGE_TAG="${PULSAR_VERSION}" -t "${IMAGE_NAME}" .
+echo "build docker image ${IMAGE_NAME}:${PULSAR_VERSION}"

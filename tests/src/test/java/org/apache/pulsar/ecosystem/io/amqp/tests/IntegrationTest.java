@@ -43,7 +43,6 @@ import org.apache.qpid.jms.message.JmsTextMessage;
 import org.awaitility.Awaitility;
 import org.junit.Assert;
 import org.junit.Test;
-import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.Network;
 
