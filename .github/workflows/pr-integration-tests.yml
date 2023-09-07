@@ -35,7 +35,9 @@ jobs:
         mvn clean install -DskipTests
 
     - name: build test image
-      run: ./tests/build.sh
+      run: |
+        cd tests
+        ./build.sh
 
     - name: tests module
       run: mvn test -pl tests
