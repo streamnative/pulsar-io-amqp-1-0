@@ -79,7 +79,7 @@ No matter how you create an AMQP1_0 sink connector, the minimum configuration co
     }
 ```
 
-### 3. Show data on AMQP1_0 service
+### 3. Consume data from AMQP1_0 service
 
 ``` java
     public static void main(String[] args) {
