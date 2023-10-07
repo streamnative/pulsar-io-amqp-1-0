@@ -1,26 +1,26 @@
 ---
 dockerfile: "https://hub.docker.com/r/streamnative/pulsar-io-amqp-1-0"
-alias: AMQP1_0 Source Connector
+alias: AMQP 1.0 Source Connector
 ---
 
-# AMQP1_0 source connector
+# AMQP 1.0 source connector
 
-The AMQP1_0 source connector receives messages from [AMQP 1.0](https://www.amqp.org/) and writes messages to Pulsar topics.
+The AMQP 1.0 source connector receives messages from [AMQP 1.0](https://www.amqp.org/) and writes messages to Pulsar topics.
 
 ![](/docs/amqp-1-0-source.png)
 
 ## Quick start
 
-### 1. Start AMQP1_0 service
+### 1. Start AMQP 1.0 service
 
-Start support AMQP1_0 protocol service, such as [Solace](https://docs.solace.com/index.html).
+Start support AMQP 1.0 protocol service, such as [Solace](https://docs.solace.com/index.html).
 ```bash
 docker run -d -p 8080:8080 -p:8008:8008 -p:1883:1883 -p:8000:8000 -p:5672:5672 -p:9000:9000 -p:2222:2222 --shm-size=2g --env username_admin_globalaccesslevel=admin --env username_admin_password=admin --name=solace solace/solace-pubsub-standard
 ```
 
 ### 2. Create a connector
 
-Depending on the environment, there are several ways to create an AMQP1_0 sink connector:
+Depending on the environment, there are several ways to create an AMQP 1.0 sink connector:
 
 - [Create Connector on StreamNative Cloud](https://docs.streamnative.io/docs/connector-create).
 - [Create Connector with Function worker](https://pulsar.apache.org/docs/3.0.x/io-quickstart/).
@@ -28,7 +28,7 @@ Depending on the environment, there are several ways to create an AMQP1_0 sink c
 - [Create Connector with Function mesh](https://functionmesh.io/docs/connectors/run-connector).
   Using this way requires you to set the docker image. You can choose the version you want to launch from [here](https://hub.docker.com/r/streamnative/pulsar-io-amqp-1-0/tags)
 
-No matter how you create an AMQP1_0 sink connector, the minimum configuration contains the following parameters.
+No matter how you create an AMQP 1.0 sink connector, the minimum configuration contains the following parameters.
 
 ```yaml
     configs:
@@ -46,12 +46,12 @@ No matter how you create an AMQP1_0 sink connector, the minimum configuration co
       queue: user-op-queue-pulsar
 ```
 
-> * The configuration structure varies depending on how you create the AMQP1_0 sink connector.
+> * The configuration structure varies depending on how you create the AMQP 1.0 sink connector.
     >   For example, some are **JSON**, some are **YAML**, and some are **Kubernetes YAML**. You need to adapt the configs to the corresponding format.
 >
 > * If you want to configure more parameters, see [Configuration Properties](#configuration-properties) for reference.
 
-### 2. Send messages to the AMQP1_0 service
+### 2. Send messages to the AMQP 1.0 service
 
 {% callout title="Note" type="note" %}
 - The following sample code uses the **Apache qpid** library.
@@ -67,7 +67,7 @@ No matter how you create an AMQP1_0 sink connector, the minimum configuration co
         producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
         Destination destination = new JmsQueue("user-op-queue");
         for (int i = 0; i < 10; i++) {
-            producer.send(destination, "Hello AMQP1_0 - " + i);
+            producer.send(destination, "Hello AMQP 1.0 - " + i);
         }
         connection.close();
     }
@@ -87,7 +87,7 @@ consume "The topic that you specified when you created the connector" -s "test-s
 
 ## Configuration Properties
 
-Before using the AMQP1_0 sink connector, you need to configure it.
+Before using the AMQP 1.0 sink connector, you need to configure it.
 
 You can create a configuration file (JSON or YAML) to set the following properties.
 
