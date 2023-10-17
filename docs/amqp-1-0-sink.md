@@ -13,7 +13,7 @@ The AMQP 1.0 sink connector pulls messages from Pulsar topics and persists messa
 
 ### 1. Start AMQP 1.0 service
 
-Start support AMQP 1.0 protocol service, such as [Solace](https://docs.solace.com/index.html).
+Start a service that supports the AMQP 1.0 protocol, such as [Solace](https://docs.solace.com/index.html).
 ```bash
 docker run -d -p 8080:8080 -p:8008:8008 -p:1883:1883 -p:8000:8000 -p:5672:5672 -p:9000:9000 -p:2222:2222 --shm-size=2g --env username_admin_globalaccesslevel=admin --env username_admin_password=admin --name=solace solace/solace-pubsub-standard
 ```
