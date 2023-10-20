@@ -18,7 +18,7 @@
 #
 
 ARG PULSAR_IMAGE_TAG
-FROM streamnative/pulsar:${PULSAR_IMAGE_TAG}
+FROM docker.cloudsmith.io/streamnative/staging/pulsar:${PULSAR_IMAGE_TAG}
 
 ### Add connector
 COPY ./src/test/resources/pulsar-io-amqp1_0.nar /pulsar/connectors/pulsar-io-amqp1_0.nar
