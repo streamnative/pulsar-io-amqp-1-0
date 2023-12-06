@@ -18,7 +18,6 @@
  */
 package org.apache.pulsar.ecosystem.io.amqp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Map;
 import lombok.Data;
