@@ -90,6 +90,11 @@
     <dependencies>
       <dependency>
         <groupId>io.streamnative</groupId>
+        <artifactId>pulsar-io-common</artifactId>
+        <version>${pulsar.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.streamnative</groupId>
         <artifactId>pulsar-io-core</artifactId>
         <version>${pulsar.version}</version>
       </dependency>
@@ -182,6 +187,11 @@
     </dependency>
 
     <!-- runtime dependencies -->
+    <dependency>
+      <groupId>io.streamnative</groupId>
+      <artifactId>pulsar-io-common</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>io.streamnative</groupId>
       <artifactId>pulsar-io-core</artifactId>

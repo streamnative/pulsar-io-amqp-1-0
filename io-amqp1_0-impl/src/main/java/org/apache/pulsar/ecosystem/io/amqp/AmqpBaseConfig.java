@@ -25,6 +25,7 @@ import java.util.Map;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.apache.pulsar.io.core.annotations.FieldDoc;
 import org.apache.qpid.jms.JmsDestination;
 import org.apache.qpid.jms.JmsQueue;
 import org.apache.qpid.jms.JmsTopic;
@@ -36,7 +37,18 @@ import org.apache.qpid.jms.JmsTopic;
 @Accessors(chain = true)
 public class AmqpBaseConfig {
 
+    @FieldDoc(
+            sensitive = true,
+            defaultValue = "",
+            help = "the username of the AMQP."
+    )
     private String username;
+
+    @FieldDoc(
+            sensitive = true,
+            defaultValue = "",
+            help = "the password of the AMQP."
+    )
     private String password;
     @Deprecated
     /* Use Connection with failover support instead
@@ -53,9 +65,29 @@ public class AmqpBaseConfig {
       For single uri configuration without failover support provide a list with one ConnectionUri in Connection
      */
     private int port;
+
+    @FieldDoc(
+            defaultValue = "",
+            help = "the AMQP queue."
+    )
     private String queue;
+
+    @FieldDoc(
+            defaultValue = "",
+            help = "the AMQP topic."
+    )
     private String topic;
+
+    @FieldDoc(
+            defaultValue = "",
+            help = "the connection url of AMQP."
+    )
     public Connection connection;
+
+    @FieldDoc(
+            defaultValue = "false",
+            help = "whether message is test format only."
+    )
     private boolean onlyTextMessage = false;
 
     public static AmqpBaseConfig load(Map<String, Object> config) throws IOException {
