@@ -21,8 +21,10 @@ package org.apache.pulsar.ecosystem.io.amqp;
 import java.util.HashMap;
 import java.util.Map;
 import javax.jms.JMSContext;
+import org.apache.pulsar.io.core.SourceContext;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 /**
  * Amqp source config test.
@@ -32,7 +34,8 @@ public class AmqpSourceConfigTest {
     @Test
     public void testDefaultSessionMode() throws Exception {
         Map<String, Object> paramsMap = getBaseConfig();
-        AmqpSourceConfig sourceConfig = AmqpSourceConfig.load(paramsMap);
+        SourceContext sourceContext = Mockito.mock(SourceContext.class);
+        AmqpSourceConfig sourceConfig = AmqpSourceConfig.load(paramsMap, sourceContext);
         sourceConfig.validate();
 
         Assert.assertEquals(JMSContext.AUTO_ACKNOWLEDGE, sourceConfig.getSessionMode());
@@ -42,10 +45,29 @@ public class AmqpSourceConfigTest {
     public void testClientAcknowledgeSessionMode() throws Exception {
         Map<String, Object> paramsMap = getBaseConfig();
         paramsMap.put("sessionMode", 2);
-        AmqpSourceConfig sourceConfig = AmqpSourceConfig.load(paramsMap);
+        SourceContext sourceContext = Mockito.mock(SourceContext.class);
+        AmqpSourceConfig sourceConfig = AmqpSourceConfig.load(paramsMap, sourceContext);
         sourceConfig.validate();
 
         Assert.assertEquals(JMSContext.CLIENT_ACKNOWLEDGE, sourceConfig.getSessionMode());
+    }
+
+    @Test
+    public void testLoadCredentialFromSecret() throws Exception {
+        Map<String, Object> paramsMap = getBaseConfig();
+        paramsMap.put("sessionMode", 1);
+
+        SourceContext sourceContext = Mockito.mock(SourceContext.class);
+        Mockito.when(sourceContext.getSecret("username"))
+                .thenReturn("admin");
+        Mockito.when(sourceContext.getSecret("password"))
+                .thenReturn("admin");
+        AmqpSourceConfig sourceConfig = AmqpSourceConfig.load(paramsMap, sourceContext);
+        sourceConfig.validate();
+
+        Assert.assertEquals(JMSContext.AUTO_ACKNOWLEDGE, sourceConfig.getSessionMode());
+        Assert.assertEquals("admin", sourceConfig.getUsername());
+        Assert.assertEquals("admin", sourceConfig.getPassword());
     }
 
     private Map<String, Object> getBaseConfig() {

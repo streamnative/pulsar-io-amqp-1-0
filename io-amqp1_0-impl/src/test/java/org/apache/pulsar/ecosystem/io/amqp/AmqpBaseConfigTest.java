@@ -25,8 +25,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.pulsar.io.core.SourceContext;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 
 /**
@@ -276,7 +278,8 @@ public class AmqpBaseConfigTest {
         Map<String, Object> paramsMap = getBaseConfig();
         paramsMap.put("queue", "test-queue");
         paramsMap.put("topic", "test-topic");
-        AmqpSourceConfig sourceConfig = AmqpSourceConfig.load(paramsMap);
+        SourceContext sourceContext = Mockito.mock(SourceContext.class);
+        AmqpSourceConfig sourceConfig = AmqpSourceConfig.load(paramsMap, sourceContext);
         try {
             sourceConfig.validate();
             Assert.fail("The test should fail because queue and topic all set at the same time.");
@@ -289,7 +292,8 @@ public class AmqpBaseConfigTest {
     @Test
     public void destinationNotSetTest() throws Exception {
         Map<String, Object> paramsMap = getBaseConfig();
-        AmqpSourceConfig sourceConfig = AmqpSourceConfig.load(paramsMap);
+        SourceContext sourceContext = Mockito.mock(SourceContext.class);
+        AmqpSourceConfig sourceConfig = AmqpSourceConfig.load(paramsMap, sourceContext);
         try {
             sourceConfig.validate();
             Assert.fail("The test should fail because queue and topic all not set.");
@@ -303,12 +307,13 @@ public class AmqpBaseConfigTest {
     public void destinationConfigTest() throws Exception {
         Map<String, Object> paramsMap = getBaseConfig();
         paramsMap.put("queue", "test-queue");
-        AmqpSourceConfig sourceConfig = AmqpSourceConfig.load(paramsMap);
+        SourceContext sourceContext = Mockito.mock(SourceContext.class);
+        AmqpSourceConfig sourceConfig = AmqpSourceConfig.load(paramsMap, sourceContext);
         sourceConfig.validate();
 
         paramsMap.remove("queue");
         paramsMap.put("topic", "test-topic");
-        sourceConfig = AmqpSourceConfig.load(paramsMap);
+        sourceConfig = AmqpSourceConfig.load(paramsMap, sourceContext);
         sourceConfig.validate();
     }
 

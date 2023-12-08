@@ -18,13 +18,15 @@
  */
 package org.apache.pulsar.ecosystem.io.amqp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Map;
 import javax.jms.JMSContext;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import org.apache.pulsar.io.common.IOConfigUtils;
+import org.apache.pulsar.io.core.SourceContext;
+import org.apache.pulsar.io.core.annotations.FieldDoc;
 
 
 /**
@@ -36,11 +38,14 @@ import lombok.experimental.Accessors;
 public class AmqpSourceConfig extends AmqpBaseConfig {
 
     // Default session mode
+    @FieldDoc(
+            defaultValue = "1",
+            help = "the session mode."
+    )
     private int sessionMode = JMSContext.AUTO_ACKNOWLEDGE;
 
-    public static AmqpSourceConfig load(Map<String, Object> config) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.readValue(objectMapper.writeValueAsBytes(config), AmqpSourceConfig.class);
+    public static AmqpSourceConfig load(Map<String, Object> config, SourceContext sourceContext) throws IOException {
+        return IOConfigUtils.loadWithSecrets(config,  AmqpSourceConfig.class, sourceContext);
     }
 
     public int getSessionMode() {
