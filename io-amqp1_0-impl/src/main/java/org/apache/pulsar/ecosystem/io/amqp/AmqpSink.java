@@ -55,7 +55,7 @@ public class AmqpSink implements Sink<ByteBuffer> {
 
     @Override
     public void open(Map map, SinkContext sinkContext) throws Exception {
-        config = AmqpSinkConfig.load(map);
+        config = AmqpSinkConfig.load(map, sinkContext);
         config.validate();
 
         JmsConnectionFactory factory;

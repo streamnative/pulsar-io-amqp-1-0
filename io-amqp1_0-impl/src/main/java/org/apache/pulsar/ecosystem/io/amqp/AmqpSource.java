@@ -55,7 +55,7 @@ public class AmqpSource extends PushSource<ByteBuffer> {
 
     @Override
     public void open(Map map, SourceContext sourceContext) throws Exception {
-        config = AmqpSourceConfig.load(map);
+        config = AmqpSourceConfig.load(map, sourceContext);
         config.validate();
 
         JmsConnectionFactory factory;

@@ -18,12 +18,13 @@
  */
 package org.apache.pulsar.ecosystem.io.amqp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Map;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import org.apache.pulsar.io.common.IOConfigUtils;
+import org.apache.pulsar.io.core.SinkContext;
 
 
 /**
@@ -34,9 +35,8 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class AmqpSinkConfig extends AmqpBaseConfig {
 
-    public static AmqpSinkConfig load(Map<String, Object> config) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.readValue(objectMapper.writeValueAsBytes(config), AmqpSinkConfig.class);
+    public static AmqpSinkConfig load(Map<String, Object> config, SinkContext sinkContext) throws IOException {
+        return IOConfigUtils.loadWithSecrets(config,  AmqpSinkConfig.class, sinkContext);
     }
 
 }
