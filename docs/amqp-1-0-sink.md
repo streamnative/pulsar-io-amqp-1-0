@@ -1,5 +1,5 @@
 ---
-dockerfile: "https://hub.docker.com/r/streamnative/pulsar-io-amqp-1-0"
+dockerfile: "https://hub.docker.com/r/streamnative/pulsar-io-amqp1_0"
 alias: AMQP 1.0 Sink Connector
 ---
 
