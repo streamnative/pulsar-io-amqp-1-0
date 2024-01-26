@@ -18,5 +18,5 @@
 #
 
 ARG PULSAR_VERSION
-FROM docker.cloudsmith.io/streamnative/staging/pulsar-functions-java-runner:${PULSAR_VERSION}
+FROM streamnative/pulsar-functions-java-runner:${PULSAR_VERSION}
 COPY ../io-amqp1_0-impl/target/*.nar /pulsar/connectors/
