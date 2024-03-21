@@ -23,6 +23,9 @@ jobs:
         distribution: 'temurin'
         java-version: 17
 
+    - name: Login SN docker hub
+      run: docker login -u="${{ secrets.DOCKER_USER }}" -p="${{ secrets.DOCKER_PASSWORD}}"
+
     - name: clean disk
       if: ${{ steps.check_changes.outputs.docs_only != 'true' }}
       run: |
