@@ -22,9 +22,6 @@ jobs:
       with:
         java-version: 17
 
-    - name: Login SN docker hub
-      run: docker login -u="${{ secrets.DOCKER_USER }}" -p="${{ secrets.DOCKER_PASSWORD}}"
-
     - name: clean disk
       if: ${{ steps.check_changes.outputs.docs_only != 'true' }}
       run: |
@@ -32,6 +29,9 @@ jobs:
         sudo apt clean
         docker rmi $(docker images -q) -f
         df -h
+
+    - name: Login SN docker hub
+      run: docker login -u="${{ secrets.DOCKER_USER }}" -p="${{ secrets.DOCKER_PASSWORD}}"
 
     - name: Build with Maven skipTests
       run: |
