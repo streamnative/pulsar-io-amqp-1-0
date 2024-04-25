@@ -25,3 +25,4 @@ COPY ./src/test/resources/pulsar-io-amqp1_0.nar /pulsar/connectors/pulsar-io-amq
 COPY ./src/test/resources/amqp1_0-source-config.yaml /pulsar/amqp1_0-source-config.yaml
 COPY ./src/test/resources/amqp1_0-sink-config.yaml /pulsar/amqp1_0-sink-config.yaml
 COPY ./src/test/resources/amqp1_0-source-config-session-mode.yaml /pulsar/amqp1_0-source-config-session-mode.yaml
+RUN mkdir -p /pulsar/packages-storage
