@@ -20,6 +20,8 @@
 ARG PULSAR_IMAGE_TAG
 FROM snstage/pulsar:${PULSAR_IMAGE_TAG}
 
+USER root
+
 ### Add connector
 COPY ./src/test/resources/pulsar-io-amqp1_0.nar /pulsar/connectors/pulsar-io-amqp1_0.nar
 COPY ./src/test/resources/amqp1_0-source-config.yaml /pulsar/amqp1_0-source-config.yaml
