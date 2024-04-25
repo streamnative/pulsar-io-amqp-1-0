@@ -73,6 +73,7 @@ public class IntegrationTest {
         standaloneContainer.setNetwork(network);
         standaloneContainer.withEnv("PULSAR_PREFIX_functionsWorkerEnabled", "true");
         String command = "bin/apply-config-from-env.py /pulsar/conf/standalone.conf "
+                + "&& mkdir -p packages-storage"
                 + "&& bin/pulsar standalone";
         standaloneContainer.withExposedPorts(8080);
         standaloneContainer.withCommand("sh", "-c", command);
