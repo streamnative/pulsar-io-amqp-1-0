@@ -30,7 +30,7 @@ import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
  */
 public class PulsarStandaloneContainer extends GenericContainer {
 
-    public static final String IMAGE = "docker.cloudsmith.io/streamnative/staging/pulsar:2.10.5.3";
+    public static final String IMAGE = "snstage/pulsar:2.10.5.3-a41ecf";
 
     PulsarStandaloneContainer(String imageName) {
         super(imageName);
