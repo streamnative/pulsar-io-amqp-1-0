@@ -18,7 +18,7 @@
 #
 
 ARG PULSAR_IMAGE_TAG
-FROM streamnative/pulsar:${PULSAR_IMAGE_TAG}
+FROM snstage/pulsar:${PULSAR_IMAGE_TAG}
 
 USER root
 
