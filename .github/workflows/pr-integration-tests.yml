@@ -25,13 +25,16 @@ jobs:
     - name: Login SN docker hub
       run: docker login -u="${{ secrets.DOCKER_USER }}" -p="${{ secrets.DOCKER_PASSWORD}}"
 
-    - name: clean disk
-      if: ${{ steps.check_changes.outputs.docs_only != 'true' }}
-      run: |
-        sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
-        sudo apt clean
-        docker rmi $(docker images -q) -f
-        df -h
+    - name: Free Disk Space (Ubuntu)
+      uses: jlumbroso/free-disk-space@v1.3.0
+      with:
+        tool-cache: false
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: true
+        docker-images: true
+        swap-storage: true
 
     - name: Build with Maven skipTests
       run: |
