@@ -43,7 +43,7 @@ jobs:
            
       - name: build and push docker image
         run: |
-          PULSAR_VERSION=`./scripts/dev/get-project-version.py`
+          PULSAR_VERSION=`mvn -q -Dexec.executable=echo -Dexec.args='${pulsar.version}' --non-recursive exec:exec 2>/dev/null`
           cd io-amqp1_0-impl
           REPO=`mvn -q -Dexec.executable=echo -Dexec.args='${project.artifactId}' --non-recursive exec:exec 2>/dev/null`
           cd -
